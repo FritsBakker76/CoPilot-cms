@@ -1,0 +1,94 @@
+@model IEnumerable<CmsModern.Models.User>
+@{
+    ViewData["Title"] = "Users";
+}
+<h1>Users</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<!-- Add User Form -->
+<h3>Add New User</h3>
+<form method="post" action="/admin/CreateUser">
+    @Html.AntiForgeryToken()
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" name="username" class="form-control" placeholder="Username" required />
+        </div>
+        <div class="col-md-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required />
+        </div>
+        <div class="col-md-2">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="isAdmin" id="isAdminNew">
+                <label class="form-check-label" for="isAdminNew">
+                    Admin
+                </label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-success">Add User</button>
+        </div>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Is Admin</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            if (user.Id == ViewBag.EditId)
+            {
+                <!-- Edit Form -->
+                <tr>
+                    <form method="post" action="/admin/EditUser">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <td><input type="text" name="username" value="@user.Username" class="form-control" required /></td>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="isAdmin" @(user.IsAdmin ? "checked" : "") />
+                            </div>
+                        </td>
+                        <td>
+                            <input type="password" name="password" class="form-control" placeholder="New Password (leave empty to keep)" />
+                            <button type="submit" class="btn btn-primary btn-sm mt-1">Save</button>
+                            <a href="@Url.Action("Users")" class="btn btn-secondary btn-sm mt-1">Cancel</a>
+                        </td>
+                    </form>
+                </tr>
+            }
+            else
+            {
+                <!-- Display Row -->
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@(user.IsAdmin ? "Yes" : "No")</td>
+                    <td>
+                        <a href="@Url.Action("Users", new { editId = user.Id })" class="btn btn-warning btn-sm">Edit</a>
+                        @if (user.Username != "admin")
+                        {
+                            <form method="post" action="/admin/DeleteUser">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@user.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
