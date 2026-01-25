@@ -1,0 +1,30 @@
+@model CmsModern.Models.Page
+@{
+    ViewData["Title"] = "Pagina aanpassen";
+}
+<h1>Pagina aanpassen</h1>
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label"></label>
+        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+    </div>
+    <div class="mb-3">
+        <label asp-for="GoogleTitle" class="form-label"></label>
+        <input asp-for="GoogleTitle" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="GoogleDescription" class="form-label"></label>
+        <input asp-for="GoogleDescription" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Opslaan</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleren</a>
+</form>

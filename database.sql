@@ -1,0 +1,21 @@
+
+CREATE DATABASE IF NOT EXISTS cmsmodern CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE cmsmodern;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE pages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    content TEXT,
+    google_title VARCHAR(100),
+    google_description VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

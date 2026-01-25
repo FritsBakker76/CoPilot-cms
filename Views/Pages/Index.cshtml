@@ -1,0 +1,26 @@
+@model IEnumerable<CmsModern.Models.Page>
+@{
+    ViewData["Title"] = "Pagina's";
+}
+<h1>Pagina's</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Titel</th>
+            <th>Omschrijving</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Title</td>
+            <td>@p.Description</td>
+            <td>
+                <a class="btn btn-primary btn-sm" href="@Url.Action("Edit", new { id = p.Id })">Aanpassen</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

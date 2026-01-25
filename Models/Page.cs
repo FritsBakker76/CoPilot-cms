@@ -1,0 +1,22 @@
+
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CmsModern.Models
+{
+    public class Page
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Content { get; set; }
+        [Column("google_title")]
+        public string GoogleTitle { get; set; }
+        [Column("google_description")]
+        public string GoogleDescription { get; set; }
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+}

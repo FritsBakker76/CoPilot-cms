@@ -1,0 +1,48 @@
+# .NET Core
+bin/
+obj/
+
+# Visual Studio
+*.user
+*.suo
+*.tmp
+*.temp
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# ASP.NET Core
+wwwroot/lib/
+
+# Entity Framework
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
