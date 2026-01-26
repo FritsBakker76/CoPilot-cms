@@ -110,6 +110,13 @@ namespace CmsModern
                     footerSocial TEXT
                 );");
                 
+                // Add banner_path column to pages table if it doesn't exist
+                try
+                {
+                    context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN banner_path VARCHAR(500)");
+                }
+                catch { /* Column already exists */ }
+                
                 // Columns are included in the CREATE TABLE IF NOT EXISTS statement above; no extra ALTERs needed
                 // Insert sample data if not exists
                 if (!context.PageContents.Any())

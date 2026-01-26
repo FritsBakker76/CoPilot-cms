@@ -6,6 +6,17 @@
     var contents = ViewBag.Contents as List<CmsModern.Models.PageContent>;
 }
 
+@if (!string.IsNullOrEmpty(Model.BannerPath))
+{
+    <div style="position: relative; left: 50%; transform: translateX(-50%); width: 100vw; margin: 0; margin-top: -12px; margin-bottom: 20px; border-top: 2px rgba(0, 0, 0, 0.3) solid; border-bottom: 2px rgba(0, 0, 0, 0.3) solid; overflow: hidden;">
+        <img src="@Model.BannerPath" alt="Page banner" style="width: 100%; height: auto; display: block;" />
+    </div>
+}
+else
+{
+    <div style="position: relative; left: 50%; transform: translateX(-50%); width: 100vw; margin: 0; margin-top: -2px; margin-bottom: 20px; border-top: 2px rgba(0, 0, 0, 0.3) solid;"></div>
+}
+
 @if (User.Identity.IsAuthenticated)
 {
     <div class="d-flex justify-content-end align-items-center gap-2 mb-3 mt-3">

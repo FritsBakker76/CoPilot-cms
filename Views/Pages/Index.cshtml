@@ -55,7 +55,7 @@
             </td>
         </tr>
         <tr class="edit-mode d-none" data-page-id="@p.Id">
-            <form class="page-edit-form" method="post" action="@Url.Action("Edit", new { id = p.Id })">
+            <form class="page-edit-form" method="post" action="@Url.Action("Edit", new { id = p.Id })" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="Id" value="@p.Id" />
                 <input type="hidden" name="Description" value="@p.Description" />
@@ -70,9 +70,19 @@
                     <input type="text" name="GoogleDescription" class="form-control form-control-sm" value="@p.GoogleDescription" />
                 </td>
                 <td>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
-                        <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-group mb-0" style="font-size: 0.85rem;">
+                            <label class="form-label mb-1">Banner afbeelding</label>
+                            <input type="file" name="bannerFile" class="form-control form-control-sm" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(p.BannerPath))
+                            {
+                                <small class="text-muted d-block mt-1">Huidige banner aanwezig</small>
+                            }
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
+                            <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
+                        </div>
                     </div>
                 </td>
             </form>

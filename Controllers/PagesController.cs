@@ -129,12 +129,53 @@ namespace CmsModern.Controllers
         // POST: Pages/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Content,GoogleTitle,GoogleDescription")] Page page)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Content,GoogleTitle,GoogleDescription,BannerPath")] Page page, IFormFile bannerFile)
         {
             if (id != page.Id) return NotFound();
             if (ModelState.IsValid)
             {
-                _context.Update(page);
+                // Get the existing page from the database
+                var existingPage = await _context.Pages.FindAsync(id);
+                if (existingPage == null) return NotFound();
+
+                // Update properties from the form
+                existingPage.Title = page.Title;
+                existingPage.Description = page.Description;
+                existingPage.Content = page.Content;
+                existingPage.GoogleTitle = page.GoogleTitle;
+                existingPage.GoogleDescription = page.GoogleDescription;
+
+                // Handle banner file upload
+                if (bannerFile != null && bannerFile.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "banners");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + bannerFile.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await bannerFile.CopyToAsync(fileStream);
+                    }
+
+                    // Delete old banner if it exists
+                    if (existingPage.BannerPath != null)
+                    {
+                        var oldFilePath = Path.Combine(_env.WebRootPath, existingPage.BannerPath.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    existingPage.BannerPath = "/uploads/banners/" + uniqueFileName;
+                }
+
+                _context.Update(existingPage);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
