@@ -92,6 +92,26 @@ namespace CmsModern
                     created DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (pageId) REFERENCES pages(id)
                 );");
+                context.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS websitesettings (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    logoPath VARCHAR(500),
+                    siteTitle VARCHAR(200),
+                    headerBg VARCHAR(20),
+                    headerTextColor VARCHAR(20),
+                    siteBg VARCHAR(20),
+                    siteTextColor VARCHAR(20),
+                    footerBg VARCHAR(20),
+                    footerTextColor VARCHAR(20),
+                    fontPageTitle INT,
+                    fontAlineaTitle INT,
+                    fontWebsiteText INT,
+                    fontSlideshowFooter INT,
+                    footerContact TEXT,
+                    footerOpeningHours TEXT,
+                    footerSocial TEXT
+                );");
+                
+                // Columns are included in the CREATE TABLE IF NOT EXISTS statement above; no extra ALTERs needed
                 // Insert sample data if not exists
                 if (!context.PageContents.Any())
                 {
@@ -150,6 +170,30 @@ namespace CmsModern
                     var admin = context.Users.First(u => u.Username == "admin");
                     admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin");
                     admin.IsAdmin = true;
+                    context.SaveChanges();
+                }
+
+                if (!context.WebsiteSettings.Any())
+                {
+                    context.WebsiteSettings.Add(new Models.WebsiteSettings
+                    {
+                        SiteTitle = "CMS MODERN",
+                        HeaderBg = "#f8f9fa",
+                        HeaderTextColor = "#000000",
+                        MenuBg = "#f8f9fa",
+                        MenuTextColor = "#000000",
+                        SiteBg = "#ffffff",
+                        SiteTextColor = "#333333",
+                        FooterBg = "#f8f9fa",
+                        FooterTextColor = "#000000",
+                        FontPageTitle = 28,
+                        FontAlineaTitle = 22,
+                        FontWebsiteText = 16,
+                        FontSlideshowFooter = 14,
+                        FooterContact = "",
+                        FooterOpeningHours = "",
+                        FooterSocial = ""
+                    });
                     context.SaveChanges();
                 }
             }

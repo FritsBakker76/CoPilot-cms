@@ -63,22 +63,43 @@ namespace CmsModern.Controllers
             return RedirectToAction("Page", new { id = pageId });
         }
 
-        public IActionResult PageTemplates(int pageId)
+        public IActionResult PageTemplates(int pageId, string position = "bottom")
         {
             ViewBag.PageId = pageId;
+            ViewBag.Position = position;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddContent(int pageId, string type)
+        public IActionResult AddContent(int pageId, string type, string position = "bottom")
         {
-            var maxPos = _context.PageContents.Where(pc => pc.PageId == pageId).Max(pc => (int?)pc.Position) ?? 0;
+            var contentsForPage = _context.PageContents.Where(pc => pc.PageId == pageId);
+            int newPosition;
+
+            if (!string.IsNullOrEmpty(position) && position.Equals("top", StringComparison.OrdinalIgnoreCase))
+            {
+                // Shift existing items down to make room at the top.
+                var ordered = contentsForPage.OrderBy(pc => pc.Position).ToList();
+                foreach (var item in ordered)
+                {
+                    item.Position = item.Position + 1;
+                }
+                newPosition = 1;
+            }
+            else
+            {
+                var maxPos = contentsForPage.Max(pc => (int?)pc.Position) ?? 0;
+                newPosition = maxPos + 1;
+            }
+
             var newContent = new PageContent
             {
                 PageId = pageId,
                 Type = type,
-                Position = maxPos + 1,
+                Title = "Nieuwe alinea",
+                Content = "Vervang deze tekst...",
+                Position = newPosition,
                 Created = DateTime.Now
             };
             _context.PageContents.Add(newContent);
@@ -104,6 +125,86 @@ namespace CmsModern.Controllers
             existing.Link = model.Link;
             existing.Price = model.Price;
             existing.Duration = model.Duration;
+
+            _context.SaveChanges();
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteContentSection(int pageId, int contentId)
+        {
+            var existing = _context.PageContents.FirstOrDefault(pc => pc.Id == contentId && pc.PageId == pageId);
+            if (existing == null)
+            {
+                return NotFound();
+            }
+
+            _context.PageContents.Remove(existing);
+            _context.SaveChanges();
+
+            // Re-sequence positions after deletion to keep ordering compact.
+            var items = _context.PageContents.Where(pc => pc.PageId == pageId).OrderBy(pc => pc.Position).ToList();
+            var pos = 1;
+            foreach (var item in items)
+            {
+                item.Position = pos++;
+            }
+            _context.SaveChanges();
+
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MoveContentUp(int pageId, int contentId)
+        {
+            var current = _context.PageContents.FirstOrDefault(pc => pc.Id == contentId && pc.PageId == pageId);
+            if (current == null) return NotFound();
+
+            var previous = _context.PageContents.FirstOrDefault(pc => pc.PageId == pageId && pc.Position == current.Position - 1);
+            if (previous == null) return RedirectToAction("Page", new { id = pageId, edit = true });
+
+            // Swap positions
+            var temp = current.Position;
+            current.Position = previous.Position;
+            previous.Position = temp;
+
+            _context.SaveChanges();
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MoveContentDown(int pageId, int contentId)
+        {
+            var current = _context.PageContents.FirstOrDefault(pc => pc.Id == contentId && pc.PageId == pageId);
+            if (current == null) return NotFound();
+
+            var next = _context.PageContents.FirstOrDefault(pc => pc.PageId == pageId && pc.Position == current.Position + 1);
+            if (next == null) return RedirectToAction("Page", new { id = pageId, edit = true });
+
+            // Swap positions
+            var temp = current.Position;
+            current.Position = next.Position;
+            next.Position = temp;
+
+            _context.SaveChanges();
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SavePageHeader(int pageId, string pageTitle, string pageDescription)
+        {
+            var page = _context.Pages.Find(pageId);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            page.Title = pageTitle;
+            page.Description = pageDescription;
 
             _context.SaveChanges();
             return RedirectToAction("Page", new { id = pageId, edit = true });

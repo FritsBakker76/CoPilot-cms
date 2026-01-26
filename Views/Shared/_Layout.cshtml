@@ -1,4 +1,17 @@
 
+@inject CmsModern.Data.CmsDbContext Db
+@{
+    var s = Db.WebsiteSettings.FirstOrDefault();
+    var headerBg = s?.HeaderBg ?? "#f8f9fa";
+    var headerTextColor = s?.HeaderTextColor ?? "#000000";
+    var menuBg = s?.MenuBg ?? "#f8f9fa";
+    var menuTextColor = s?.MenuTextColor ?? "#000000";
+    var siteBg = s?.SiteBg ?? "#ffffff";
+    var siteTextColor = s?.SiteTextColor ?? "#333333";
+    var footerBg = s?.FooterBg ?? "#f8f9fa";
+    var footerTextColor = s?.FooterTextColor ?? "#000000";
+    var siteTitle = string.IsNullOrWhiteSpace(s?.SiteTitle) ? "CMS MODERN" : s.SiteTitle;
+}
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -7,10 +20,39 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body style="min-height: 100vh; display: flex; flex-direction: column; padding-top: 56px;">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+<body style="min-height: 100vh; display: flex; flex-direction: column; padding-top: 56px; background-color: @siteBg; color: @siteTextColor; font-size: @(s?.FontWebsiteText.HasValue == true ? s.FontWebsiteText.Value + "px" : "inherit"); overflow-y: scroll;">
+    <style>
+        h1, .display-1 { font-size: @(s?.FontPageTitle.HasValue == true ? s.FontPageTitle.Value + "px" : "inherit") }
+        h2, .display-2 { font-size: @(s?.FontAlineaTitle.HasValue == true ? s.FontAlineaTitle.Value + "px" : "inherit") }
+        .navbar-nav .nav-link { color: @menuTextColor !important; }
+        .navbar-nav { background-color: @menuBg; border-radius: 5px; padding: 0 10px; }
+        .navbar { min-height: 56px; overflow: visible; }
+        .navbar-brand {
+            position: relative;
+            overflow: visible;
+            height: 56px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .navbar-brand .brand-logo {
+            position: absolute;
+            bottom: -22px; /* allow the logo to hang below the header */
+            left: 0;
+        }
+        .main-container { padding-top: 28px; }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" style="background-color: @headerBg; color: @headerTextColor;">
         <div class="container">
-            <a class="navbar-brand" href="/">CMS MODERN</a>
+            <a class="navbar-brand d-flex align-items-center" href="/" style="color: @headerTextColor !important;">
+                @if (!string.IsNullOrEmpty(s?.LogoPath))
+                {
+                    <img src="@s.LogoPath" alt="@siteTitle" class="brand-logo" style="width: 80px; height: 80px; object-fit: contain;" />
+                }
+                else
+                {
+                    @siteTitle
+                }
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -43,15 +85,70 @@
         </div>
     </nav>
     <main style="flex: 1;">
-        <div class="container">
+        <div class="container main-container">
             @RenderBody()
         </div>
     </main>
-    <footer style="height: 200px; background-color: #f8f9fa; text-align: center; padding: 20px;">
-        <p>&copy; 2026 CmsModern. All rights reserved.</p>
+    <style>
+        footer .footer-col p { margin: 0.25rem 0; line-height: 1.3; }
+        footer .footer-col { line-height: 1.3; }
+    </style>
+    <footer style="background-color: @footerBg; color: @footerTextColor; padding: 30px 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-3 footer-col">
+                    @Html.Raw(s?.FooterContact ?? "")
+                </div>
+                <div class="col-12 col-md-3 footer-col">
+                    @Html.Raw(s?.FooterOpeningHours ?? "")
+                </div>
+                <div class="col-12 col-md-3 footer-col">
+                </div>
+                <div class="col-12 col-md-3 footer-col">
+                    @Html.Raw(s?.FooterSocial ?? "")
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <small>&copy; 2026 @siteTitle. All rights reserved.</small>
+            </div>
+        </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss Bootstrap alerts after X ms (default: 5000)
+        document.addEventListener('DOMContentLoaded', function () {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function (alert) {
+                // Opt-out per alert by adding class 'no-auto-dismiss'
+                if (alert.classList.contains('no-auto-dismiss')) return;
+
+                const timeout = parseInt(alert.getAttribute('data-timeout') || '5000', 10);
+                if (isNaN(timeout) || timeout <= 0) return;
+
+                window.setTimeout(function () {
+                    try {
+                        if (window.bootstrap && typeof window.bootstrap.Alert === 'function') {
+                            const bsAlert = new window.bootstrap.Alert(alert);
+                            bsAlert.close();
+                            return;
+                        }
+                    } catch (e) {
+                        // fallthrough to manual fade
+                    }
+
+                    // Fallback: manual fade-out then remove
+                    alert.style.transition = alert.style.transition || 'opacity .5s ease';
+                    alert.style.opacity = '0';
+                    window.setTimeout(function () {
+                        if (alert && alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 550);
+                }, timeout);
+            });
+        });
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

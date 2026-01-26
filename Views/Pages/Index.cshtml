@@ -1,10 +1,12 @@
-@model IEnumerable<CmsModern.Models.Page>
-@{
-    ViewData["Title"] = "Pagina's";
-}
-<h1>Pagina's</h1>
-<a href="/" class="btn btn-secondary mb-3">Back to Website</a>
-<a href="@Url.Action("Users")" class="btn btn-info mb-3">Manage Users</a>
+<div class="d-flex align-items-center justify-content-between mb-4 mt-3">
+    <h1 class="m-0">Admin</h1>
+    <div class="btn-group">
+        <a href="@Url.Action("Index", "Pages")" class="btn btn-primary">Website pagina's</a>
+        <a href="@Url.Action("Users", "Pages")" class="btn btn-outline-primary">Website users</a>
+        <a href="@Url.Action("Settings", "Pages")" class="btn btn-outline-primary">Website instellingen</a>
+    </div>
+</div>
+<div class="container py-4">
 <table class="table">
     <thead>
         <tr>
@@ -25,4 +27,6 @@
         </tr>
     }
     </tbody>
+</table>
+</div>
 </table>

@@ -12,6 +12,7 @@ namespace CmsModern.Data
         public DbSet<Page> Pages { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<PageContent> PageContents { get; set; }
+        public DbSet<WebsiteSettings> WebsiteSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

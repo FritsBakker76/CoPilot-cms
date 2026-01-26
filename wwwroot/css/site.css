@@ -1,3 +1,38 @@
 body {
     padding-top: 20px;
 }
+
+/* Hover-expand label for edit (pencil) buttons */
+.btn-icon-label {
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+}
+.btn-icon-label .btn-label {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 6px;
+    white-space: nowrap;
+    transition: max-width 280ms ease, opacity 280ms ease;
+}
+.btn-icon-label:hover .btn-label,
+.btn-icon-label:focus .btn-label {
+    max-width: 160px;
+    opacity: 1;
+}
+
+/* Hover and edit mode background for content cards */
+.toggle-card {
+    transition: background-color 160ms ease;
+}
+.toggle-card:hover {
+    background-color: #f8f9fa;
+}
+.toggle-card.card-editing {
+    background-color: #f8f9fa;
+}
+
+/* Spacing for edit forms from toolbar buttons */
+.content-edit {
+    margin-top: 25px;
+}

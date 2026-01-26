@@ -1,0 +1,300 @@
+@model CmsModern.Models.WebsiteSettings
+@{
+    ViewData["Title"] = "Website instellingen";
+}
+<div class="d-flex align-items-center justify-content-between mb-4 mt-3">
+    <h1 class="m-0">Admin</h1>
+    <div class="btn-group">
+        <a href="@Url.Action("Index", "Pages")" class="btn btn-outline-primary">Website pagina's</a>
+        <a href="@Url.Action("Users", "Pages")" class="btn btn-outline-primary">Website users</a>
+        <a href="@Url.Action("Settings", "Pages")" class="btn btn-primary">Website instellingen</a>
+    </div>
+</div>
+<div class="container py-4">
+    <h2 class="mb-3">Website instellingen</h2>
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header">Algemeen</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Website titel</label>
+                        @Html.TextBoxFor(m => m.SiteTitle, new { @class = "form-control", placeholder = "CMS MODERN" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Logo upload</label>
+                        <input type="file" name="logo" class="form-control" accept=".png,.jpg,.jpeg,.svg" />
+                        @if (!string.IsNullOrEmpty(Model.LogoPath))
+                        {
+                            <div class="mt-2">
+                                <img src="@Model.LogoPath" alt="Logo" style="max-height:60px;" />
+                            </div>
+                        }
+                        <span class="text-danger">@Html.ValidationMessageFor(m => m.LogoPath)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header">Lettergroottes</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Pagina titel (px)</label>
+                                @Html.TextBoxFor(m => m.FontPageTitle, new { type = "number", @class = "form-control" })
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Alinea titel (px)</label>
+                                @Html.TextBoxFor(m => m.FontAlineaTitle, new { type = "number", @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Website tekst (px)</label>
+                                @Html.TextBoxFor(m => m.FontWebsiteText, new { type = "number", @class = "form-control" })
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Slideshow footer (px)</label>
+                                @Html.TextBoxFor(m => m.FontSlideshowFooter, new { type = "number", @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header">Kleuren</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Header</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Achtergrond</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="headerBg" name="HeaderBg" value="@(Model.HeaderBg ?? "#f8f9fa")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="headerBgText" placeholder="#f8f9fa" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Tekstkleur</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="headerText" name="HeaderTextColor" value="@(Model.HeaderTextColor ?? "#000000")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="headerTextText" placeholder="#000000" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Menu</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Achtergrond</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="menuBg" name="MenuBg" value="@(Model.MenuBg ?? "#f8f9fa")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="menuBgText" placeholder="#f8f9fa" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Tekstkleur</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="menuText" name="MenuTextColor" value="@(Model.MenuTextColor ?? "#000000")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="menuTextText" placeholder="#000000" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Website</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Achtergrond</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="siteBg" name="SiteBg" value="@(Model.SiteBg ?? "#ffffff")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="siteBgText" placeholder="#ffffff" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Tekstkleur</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="siteText" name="SiteTextColor" value="@(Model.SiteTextColor ?? "#333333")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="siteTextText" placeholder="#333333" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Footer</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Achtergrond</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="footerBg" name="FooterBg" value="@(Model.FooterBg ?? "#f8f9fa")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="footerBgText" placeholder="#f8f9fa" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Tekstkleur</small>
+                                <div class="input-group" style="width: 70%;">
+                                    <input type="color" id="footerText" name="FooterTextColor" value="@(Model.FooterTextColor ?? "#000000")" class="form-control form-control-color" style="max-width: 50px;" />
+                                    <input type="text" class="form-control" id="footerTextText" placeholder="#000000" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header">Footer inhoud</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Contact</label>
+                        @Html.TextAreaFor(m => m.FooterContact, new { @class = "form-control rich-text", rows = 6, placeholder = "Adres, telefoon, e-mail" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Openingstijden</label>
+                        @Html.TextAreaFor(m => m.FooterOpeningHours, new { @class = "form-control rich-text", rows = 6, placeholder = "Ma-Vr 09:00-17:00" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Social media</label>
+                        @Html.TextAreaFor(m => m.FooterSocial, new { @class = "form-control rich-text", rows = 6, placeholder = "Links of iconen" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+            <a href="/admin" class="btn btn-secondary ms-2">Terug</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Header BG sync
+        const headerBgColor = document.getElementById('headerBg');
+        const headerBgText = document.getElementById('headerBgText');
+        if (headerBgColor && headerBgText) {
+            headerBgText.value = headerBgColor.value;
+            headerBgColor.addEventListener('change', () => headerBgText.value = headerBgColor.value);
+            headerBgText.addEventListener('change', () => headerBgColor.value = headerBgText.value);
+        }
+
+        // Header Text Color sync
+        const headerTextColor = document.getElementById('headerText');
+        const headerTextText = document.getElementById('headerTextText');
+        if (headerTextColor && headerTextText) {
+            headerTextText.value = headerTextColor.value;
+            headerTextColor.addEventListener('change', () => headerTextText.value = headerTextColor.value);
+            headerTextText.addEventListener('change', () => headerTextColor.value = headerTextText.value);
+        }
+
+        // Menu BG sync
+        const menuBgColor = document.getElementById('menuBg');
+        const menuBgText = document.getElementById('menuBgText');
+        if (menuBgColor && menuBgText) {
+            menuBgText.value = menuBgColor.value;
+            menuBgColor.addEventListener('change', () => menuBgText.value = menuBgColor.value);
+            menuBgText.addEventListener('change', () => menuBgColor.value = menuBgText.value);
+        }
+
+        // Menu Text Color sync
+        const menuTextColor = document.getElementById('menuText');
+        const menuTextText = document.getElementById('menuTextText');
+        if (menuTextColor && menuTextText) {
+            menuTextText.value = menuTextColor.value;
+            menuTextColor.addEventListener('change', () => menuTextText.value = menuTextColor.value);
+            menuTextText.addEventListener('change', () => menuTextColor.value = menuTextText.value);
+        }
+
+        // Site BG sync
+        const siteBgColor = document.getElementById('siteBg');
+        const siteBgText = document.getElementById('siteBgText');
+        if (siteBgColor && siteBgText) {
+            siteBgText.value = siteBgColor.value;
+            siteBgColor.addEventListener('change', () => siteBgText.value = siteBgColor.value);
+            siteBgText.addEventListener('change', () => siteBgColor.value = siteBgText.value);
+        }
+
+        // Site Text Color sync
+        const siteTextColor = document.getElementById('siteText');
+        const siteTextText = document.getElementById('siteTextText');
+        if (siteTextColor && siteTextText) {
+            siteTextText.value = siteTextColor.value;
+            siteTextColor.addEventListener('change', () => siteTextText.value = siteTextColor.value);
+            siteTextText.addEventListener('change', () => siteTextColor.value = siteTextText.value);
+        }
+
+        // Footer BG sync
+        const footerBgColor = document.getElementById('footerBg');
+        const footerBgText = document.getElementById('footerBgText');
+        if (footerBgColor && footerBgText) {
+            footerBgText.value = footerBgColor.value;
+            footerBgColor.addEventListener('change', () => footerBgText.value = footerBgColor.value);
+            footerBgText.addEventListener('change', () => footerBgColor.value = footerBgText.value);
+        }
+
+        // Footer Text Color sync
+        const footerTextColor = document.getElementById('footerText');
+        const footerTextText = document.getElementById('footerTextText');
+        if (footerTextColor && footerTextText) {
+            footerTextText.value = footerTextColor.value;
+            footerTextColor.addEventListener('change', () => footerTextText.value = footerTextColor.value);
+            footerTextText.addEventListener('change', () => footerTextColor.value = footerTextText.value);
+        }
+    });
+</script>
+
+@section Scripts {
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        .ql-container { font-size: 14px; }
+        .ql-editor { min-height: 150px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const textareas = document.querySelectorAll('textarea.rich-text');
+            textareas.forEach(function (textarea) {
+                const containerId = 'quill-' + Math.random().toString(36).substr(2, 9);
+                const container = document.createElement('div');
+                container.id = containerId;
+                container.style.marginBottom = '20px';
+                textarea.parentNode.insertBefore(container, textarea);
+                textarea.style.display = 'none';
+
+                const quill = new Quill('#' + containerId, {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link'],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                // Populate with existing content
+                if (textarea.value.trim()) {
+                    quill.root.innerHTML = textarea.value;
+                }
+
+                // Sync Quill content back to textarea on form submit
+                textarea.form.addEventListener('submit', function () {
+                    textarea.value = quill.root.innerHTML;
+                });
+            });
+        });
+    </script>
+}
