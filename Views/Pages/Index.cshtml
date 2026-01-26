@@ -7,26 +7,105 @@
     </div>
 </div>
 <div class="container py-4">
+<style>
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 20%;
+    }
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 25%;
+    }
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 35%;
+    }
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 20%;
+    }
+    .table {
+        table-layout: fixed;
+    }
+</style>
 <table class="table">
     <thead>
         <tr>
             <th>Titel</th>
-            <th>Omschrijving</th>
+            <th>Google Titel</th>
+            <th>Google Omschrijving</th>
             <th>Acties</th>
         </tr>
     </thead>
     <tbody>
     @foreach (var p in Model)
     {
-        <tr>
-            <td>@p.Title</td>
-            <td>@p.Description</td>
-            <td>
-                <a class="btn btn-primary btn-sm" href="@Url.Action("Edit", new { id = p.Id })">Aanpassen</a>
+        <tr class="page-row" data-page-id="@p.Id">
+            <td class="view-mode">
+                <span class="page-title">@p.Title</span>
             </td>
+            <td class="view-mode">
+                <span class="page-google-title">@p.GoogleTitle</span>
+            </td>
+            <td class="view-mode">
+                <span class="page-google-description">@p.GoogleDescription</span>
+            </td>
+            <td class="view-mode">
+                <button class="btn btn-primary btn-sm edit-btn" type="button">Aanpassen</button>
+            </td>
+        </tr>
+        <tr class="edit-mode d-none" data-page-id="@p.Id">
+            <form class="page-edit-form" method="post" action="@Url.Action("Edit", new { id = p.Id })">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@p.Id" />
+                <input type="hidden" name="Description" value="@p.Description" />
+                <input type="hidden" name="Content" value="@p.Content" />
+                <td>
+                    <input type="text" name="Title" class="form-control form-control-sm" value="@p.Title" />
+                </td>
+                <td>
+                    <input type="text" name="GoogleTitle" class="form-control form-control-sm" value="@p.GoogleTitle" />
+                </td>
+                <td>
+                    <input type="text" name="GoogleDescription" class="form-control form-control-sm" value="@p.GoogleDescription" />
+                </td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
+                        <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
+                    </div>
+                </td>
+            </form>
         </tr>
     }
     </tbody>
 </table>
 </div>
-</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editBtns = document.querySelectorAll('.edit-btn');
+        const cancelBtns = document.querySelectorAll('.cancel-btn');
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.page-row');
+                const pageId = row.getAttribute('data-page-id');
+                const editRow = document.querySelector(`.edit-mode[data-page-id="${pageId}"]`);
+                row.classList.add('d-none');
+                editRow.classList.remove('d-none');
+            });
+        });
+
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const form = this.closest('.page-edit-form');
+                const editRow = form.closest('.edit-mode');
+                const pageId = editRow.getAttribute('data-page-id');
+                const viewRow = document.querySelector(`.page-row[data-page-id="${pageId}"]`);
+                editRow.classList.add('d-none');
+                viewRow.classList.remove('d-none');
+            });
+        });
+    });
+</script>

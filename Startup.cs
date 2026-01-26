@@ -44,8 +44,7 @@ namespace CmsModern
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-                app.UseHttpsRedirection();
+                // HTTPS redirection and HSTS disabled for now; enable in production when ready
             }
             app.UseStaticFiles();
 

@@ -2,6 +2,23 @@ body {
     padding-top: 20px;
 }
 
+.login-page {
+    min-height: 60vh;
+    padding: 28px 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    max-width: 350px;
+}
+
+.login-form .form-control-lg {
+    font-size: 1rem;
+    padding: 0.65rem 0.85rem;
+}
+
 /* Hover-expand label for edit (pencil) buttons */
 .btn-icon-label {
     display: inline-flex;

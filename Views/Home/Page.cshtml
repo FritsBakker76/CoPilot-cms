@@ -1,6 +1,8 @@
 @model CmsModern.Models.Page
 @{
     ViewData["Title"] = Model.Title;
+    ViewData["GoogleTitle"] = Model.GoogleTitle;
+    ViewData["GoogleDescription"] = Model.GoogleDescription;
     var contents = ViewBag.Contents as List<CmsModern.Models.PageContent>;
 }
 
