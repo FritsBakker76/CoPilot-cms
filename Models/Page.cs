@@ -9,7 +9,8 @@ namespace CmsModern.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Content { get; set; }
+        [Column("menu_item")]
+        public string MenuItem { get; set; }
         [Column("google_title")]
         public string GoogleTitle { get; set; }
         [Column("google_description")]

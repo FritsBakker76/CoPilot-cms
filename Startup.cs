@@ -11,6 +11,7 @@ using BCrypt.Net;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Data.Common;
 
 namespace CmsModern
 {
@@ -113,9 +114,62 @@ namespace CmsModern
                 // Add banner_path column to pages table if it doesn't exist
                 try
                 {
-                    context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN banner_path VARCHAR(500)");
+                    var provider = context.Database.ProviderName ?? string.Empty;
+                    var conn = context.Database.GetDbConnection();
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    using var cmd = conn.CreateCommand();
+                    if (provider.IndexOf("mysql", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pages' AND COLUMN_NAME = 'banner_path';";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('pages') WHERE name = 'banner_path';";
+                    }
+
+                    var exists = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    if (!exists)
+                    {
+                        context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN banner_path VARCHAR(500)");
+                    }
                 }
-                catch { /* Column already exists */ }
+                catch
+                {
+                    // Ignore if the column already exists or the check fails; startup should continue.
+                }
+
+                // Add menu_item column to pages table if it doesn't exist
+                try
+                {
+                    var provider = context.Database.ProviderName ?? string.Empty;
+                    var conn = context.Database.GetDbConnection();
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    using var cmd = conn.CreateCommand();
+                    if (provider.IndexOf("mysql", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pages' AND COLUMN_NAME = 'menu_item';";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('pages') WHERE name = 'menu_item';";
+                    }
+
+                    var exists = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    if (!exists)
+                    {
+                        context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN menu_item VARCHAR(255)");
+                    }
+                }
+                catch
+                {
+                    // Ignore if the column already exists or the check fails; startup should continue.
+                }
                 
                 // Columns are included in the CREATE TABLE IF NOT EXISTS statement above; no extra ALTERs needed
                 // Insert sample data if not exists
@@ -132,7 +186,7 @@ namespace CmsModern
                         {
                             Title = "Welcome",
                             Description = "Welcome to our website",
-                            Content = "Welcome content here.",
+                            MenuItem = "Welcome",
                             GoogleTitle = "Welcome Page",
                             GoogleDescription = "Welcome to our site",
                             CreatedAt = DateTime.Now,
@@ -142,7 +196,7 @@ namespace CmsModern
                         {
                             Title = "Contact",
                             Description = "Contact us",
-                            Content = "Contact information here.",
+                            MenuItem = "Contact",
                             GoogleTitle = "Contact Us",
                             GoogleDescription = "Get in touch",
                             CreatedAt = DateTime.Now,
@@ -152,7 +206,7 @@ namespace CmsModern
                         {
                             Title = "News",
                             Description = "Latest news",
-                            Content = "News content here.",
+                            MenuItem = "News",
                             GoogleTitle = "News",
                             GoogleDescription = "Stay updated",
                             CreatedAt = DateTime.Now,

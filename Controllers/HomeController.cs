@@ -4,16 +4,21 @@ using System.Linq;
 using System.Collections.Generic;
 using CmsModern.Models;
 using System;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace CmsModern.Controllers
 {
     public class HomeController : Controller
     {
         private readonly CmsDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public HomeController(CmsDbContext context)
+        public HomeController(CmsDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public IActionResult Index()
@@ -207,6 +212,124 @@ namespace CmsModern.Controllers
             page.Description = pageDescription;
 
             _context.SaveChanges();
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UploadBanner(int pageId, IFormFile bannerFile)
+        {
+            var page = _context.Pages.Find(pageId);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
+
+            if (bannerFile == null || bannerFile.Length == 0)
+            {
+                TempData["Error"] = "Selecteer een afbeelding om te uploaden.";
+                return RedirectToAction("Page", new { id = pageId, edit = true });
+            }
+
+            var ext = Path.GetExtension(bannerFile.FileName).ToLowerInvariant();
+            var allowed = new[] { ".png", ".jpg", ".jpeg", ".svg" };
+            if (!allowed.Contains(ext))
+            {
+                TempData["Error"] = "Alleen PNG, JPG, JPEG of SVG bestanden zijn toegestaan.";
+                return RedirectToAction("Page", new { id = pageId, edit = true });
+            }
+
+            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "banners");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                bannerFile.CopyTo(fileStream);
+            }
+
+            if (!string.IsNullOrWhiteSpace(page.BannerPath))
+            {
+                var oldFilePath = Path.Combine(_env.WebRootPath, page.BannerPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
+
+            page.BannerPath = $"/uploads/banners/{uniqueFileName}";
+            _context.SaveChanges();
+
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UploadContentImage(int pageId, int contentId, IFormFile contentImageFile)
+        {
+            var content = _context.PageContents.FirstOrDefault(pc => pc.Id == contentId && pc.PageId == pageId);
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
+
+            if (contentImageFile == null || contentImageFile.Length == 0)
+            {
+                TempData["Error"] = "Selecteer een afbeelding om te uploaden.";
+                return RedirectToAction("Page", new { id = pageId, edit = true });
+            }
+
+            var ext = Path.GetExtension(contentImageFile.FileName).ToLowerInvariant();
+            var allowed = new[] { ".png", ".jpg", ".jpeg", ".svg" };
+            if (!allowed.Contains(ext))
+            {
+                TempData["Error"] = "Alleen PNG, JPG, JPEG of SVG bestanden zijn toegestaan.";
+                return RedirectToAction("Page", new { id = pageId, edit = true });
+            }
+
+            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "content");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                contentImageFile.CopyTo(fileStream);
+            }
+
+            if (!string.IsNullOrWhiteSpace(content.PictureText) && content.PictureText.StartsWith("/uploads/"))
+            {
+                var oldFilePath = Path.Combine(_env.WebRootPath, content.PictureText.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
+
+            content.PictureText = $"/uploads/content/{uniqueFileName}";
+            _context.SaveChanges();
+
             return RedirectToAction("Page", new { id = pageId, edit = true });
         }
     }

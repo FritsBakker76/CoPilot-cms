@@ -31,7 +31,8 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Titel</th>
+            <th>Pagina Titel</th>
+            <th>Menu Item</th>
             <th>Google Titel</th>
             <th>Google Omschrijving</th>
             <th>Acties</th>
@@ -43,6 +44,9 @@
         <tr class="page-row" data-page-id="@p.Id">
             <td class="view-mode">
                 <span class="page-title">@p.Title</span>
+            </td>
+            <td class="view-mode">
+                <span class="page-menu-item">@p.MenuItem</span>
             </td>
             <td class="view-mode">
                 <span class="page-google-title">@p.GoogleTitle</span>
@@ -59,9 +63,11 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="Id" value="@p.Id" />
                 <input type="hidden" name="Description" value="@p.Description" />
-                <input type="hidden" name="Content" value="@p.Content" />
                 <td>
                     <input type="text" name="Title" class="form-control form-control-sm" value="@p.Title" />
+                </td>
+                <td>
+                    <input type="text" name="MenuItem" class="form-control form-control-sm" value="@p.MenuItem" />
                 </td>
                 <td>
                     <input type="text" name="GoogleTitle" class="form-control form-control-sm" value="@p.GoogleTitle" />
@@ -70,19 +76,9 @@
                     <input type="text" name="GoogleDescription" class="form-control form-control-sm" value="@p.GoogleDescription" />
                 </td>
                 <td>
-                    <div class="d-flex flex-column gap-2">
-                        <div class="form-group mb-0" style="font-size: 0.85rem;">
-                            <label class="form-label mb-1">Banner afbeelding</label>
-                            <input type="file" name="bannerFile" class="form-control form-control-sm" accept="image/*" />
-                            @if (!string.IsNullOrEmpty(p.BannerPath))
-                            {
-                                <small class="text-muted d-block mt-1">Huidige banner aanwezig</small>
-                            }
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
-                            <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
-                        </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
+                        <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
                     </div>
                 </td>
             </form>
@@ -109,12 +105,73 @@
 
         cancelBtns.forEach(btn => {
             btn.addEventListener('click', function () {
-                const form = this.closest('.page-edit-form');
-                const editRow = form.closest('.edit-mode');
+                const editRow = this.closest('.edit-mode');
                 const pageId = editRow.getAttribute('data-page-id');
                 const viewRow = document.querySelector(`.page-row[data-page-id="${pageId}"]`);
                 editRow.classList.add('d-none');
                 viewRow.classList.remove('d-none');
+            });
+        });
+
+        // AJAX form submission
+        const forms = document.querySelectorAll('.page-edit-form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const submitBtn = e.submitter || this.querySelector('.btn-success');
+                
+                if (!submitBtn) {
+                    console.error('Submit button not found');
+                    this.submit();
+                    return;
+                }
+                
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Opslaan...';
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Update only this specific row
+                        const editRow = this.closest('.edit-mode');
+                        const pageId = editRow.getAttribute('data-page-id');
+                        const viewRow = document.querySelector(`.page-row[data-page-id="${pageId}"]`);
+                        
+                        if (viewRow) {
+                            // Update view row with new values
+                            const titleSpan = viewRow.querySelector('.page-title');
+                            const menuItemSpan = viewRow.querySelector('.page-menu-item');
+                            const googleTitleSpan = viewRow.querySelector('.page-google-title');
+                            const googleDescSpan = viewRow.querySelector('.page-google-description');
+                            
+                            if (titleSpan) titleSpan.textContent = formData.get('Title') || '';
+                            if (menuItemSpan) menuItemSpan.textContent = formData.get('MenuItem') || '';
+                            if (googleTitleSpan) googleTitleSpan.textContent = formData.get('GoogleTitle') || '';
+                            if (googleDescSpan) googleDescSpan.textContent = formData.get('GoogleDescription') || '';
+                            
+                            // Switch back to view mode for this row only
+                            editRow.classList.add('d-none');
+                            viewRow.classList.remove('d-none');
+                        }
+                        
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    } else {
+                        throw new Error('Save failed');
+                    }
+                })
+                .catch(error => {
+                    alert('Fout bij opslaan. Probeer het opnieuw.');
+                    if (submitBtn) {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
             });
         });
     });

@@ -4,18 +4,37 @@
     ViewData["GoogleTitle"] = Model.GoogleTitle;
     ViewData["GoogleDescription"] = Model.GoogleDescription;
     var contents = ViewBag.Contents as List<CmsModern.Models.PageContent>;
+    var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
+    var hasBanner = !string.IsNullOrEmpty(Model.BannerPath);
 }
 
-@if (!string.IsNullOrEmpty(Model.BannerPath))
+@if (TempData["Message"] != null)
 {
-    <div style="position: relative; left: 50%; transform: translateX(-50%); width: 100vw; margin: 0; margin-top: -12px; margin-bottom: 20px; border-top: 2px rgba(0, 0, 0, 0.3) solid; border-bottom: 2px rgba(0, 0, 0, 0.3) solid; overflow: hidden;">
-        <img src="@Model.BannerPath" alt="Page banner" style="width: 100%; height: auto; display: block;" />
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
-else
+else if (TempData["Error"] != null)
 {
-    <div style="position: relative; left: 50%; transform: translateX(-50%); width: 100vw; margin: 0; margin-top: -2px; margin-bottom: 20px; border-top: 2px rgba(0, 0, 0, 0.3) solid;"></div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
+
+<div class="page-banner-wrapper @(hasBanner ? "banner-has-image" : "banner-empty")">
+    @if (hasBanner)
+    {
+        <img src="@Model.BannerPath" alt="Page banner" class="page-banner-image" />
+    }
+    @if (isAdmin)
+    {
+        <button type="button" class="btn btn-light btn-sm banner-upload-btn" data-bs-toggle="modal" data-bs-target="#bannerUploadModal" aria-label="Banner uploaden">
+            📷
+        </button>
+    }
+</div>
 
 @if (User.Identity.IsAuthenticated)
 {
@@ -57,7 +76,7 @@ else
                 <h1 class="display-4">@Model.Title</h1>
                 <p class="lead">@Model.Description</p>
             </div>
-            <form id="page-header-form" class="content-edit d-none" method="post" action="@Url.Action("SavePageHeader", "Home")">
+            <form id="page-header-form" class="content-edit d-none" method="post" action="@Url.Action("SavePageHeader", "Home")" >
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="pageId" value="@Model.Id" />
                 <div class="mb-3">
@@ -116,27 +135,55 @@ else
                             <div>@Html.Raw(content.Content)</div>
                         }
                     }
+                    else if (content.Type == "alinea#4")
+                    {
+                        @if (!string.IsNullOrEmpty(content.Content))
+                        {
+                            <div>@Html.Raw(content.Content)</div>
+                        }
+                    }
                     else if (content.Type == "alinea#2")
                     {
                         @if (!string.IsNullOrEmpty(content.Title))
                         {
                             <h3>@content.Title</h3>
                         }
-                        <div class="row">
-                            <div class="col-9">
+                        <div class="alinea-image-right">
+                            <div class="text-content">
                                 @if (!string.IsNullOrEmpty(content.Content))
                                 {
                                     @Html.Raw(content.Content)
                                 }
                             </div>
-                            <div class="col-3 ms-auto">
+                            <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Image" />
+                                    <img src="@content.PictureText" alt="Image" />
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
+                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#5")
+                    {
+                        <div class="alinea-image-right">
+                            <div class="text-content">
+                                @if (!string.IsNullOrEmpty(content.Content))
+                                {
+                                    @Html.Raw(content.Content)
+                                }
+                            </div>
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" alt="Image" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" alt="Placeholder" />
                                 }
                             </div>
                         </div>
@@ -147,18 +194,39 @@ else
                         {
                             <h3>@content.Title</h3>
                         }
-                        <div class="row">
-                            <div class="col-3 me-auto">
+                        <div class="alinea-image-left">
+                            <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Image" />
+                                    <img src="@content.PictureText" alt="Image" />
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
+                                    <img src="/images/placeholder.png" alt="Placeholder" />
                                 }
                             </div>
-                            <div class="col-9">
+                            <div class="text-content">
+                                @if (!string.IsNullOrEmpty(content.Content))
+                                {
+                                    @Html.Raw(content.Content)
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#6")
+                    {
+                        <div class="alinea-image-left">
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" alt="Image" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                }
+                            </div>
+                            <div class="text-content">
                                 @if (!string.IsNullOrEmpty(content.Content))
                                 {
                                     @Html.Raw(content.Content)
@@ -183,7 +251,7 @@ else
                     }
                 </div>
 
-                <form id="edit-form-@content.Id" class="content-edit d-none" method="post" action="@Url.Action("SaveContentSection", "Home")">
+                <form id="edit-form-@content.Id" class="content-edit d-none" method="post" action="@Url.Action("SaveContentSection", "Home")" >
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="pageId" value="@Model.Id" />
                     <input type="hidden" name="Id" value="@content.Id" />
@@ -207,39 +275,96 @@ else
                             </div>
                         </div>
                     }
-                    else if (content.Type == "alinea#2")
+                    else if (content.Type == "alinea#4")
                     {
                         <div class="row">
-                            <div class="col-12 mb-3">
-                                <label>Title</label>
-                                <input type="text" name="Title" value="@content.Title" class="form-control" />
+                            <div class="col-12">
+                                <label>Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
                             </div>
-                            <div class="row">
-                                <div class="col-9 mb-3">
-                                    <label>Content</label>
-                                    <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
-                                </div>
-                                <div class="col-3 ms-auto">
-                                    <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
-                                </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#2")
+                    {
+                        <div class="mb-3">
+                            <label>Title</label>
+                            <input type="text" name="Title" value="@content.Title" class="form-control" />
+                        </div>
+                        <div class="alinea-image-right">
+                            <div class="text-content">
+                                <label>Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
+                            </div>
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#5")
+                    {
+                        <div class="alinea-image-right">
+                            <div class="text-content">
+                                <label>Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
+                            </div>
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
                             </div>
                         </div>
                     }
                     else if (content.Type == "alinea#3")
                     {
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label>Title</label>
-                                <input type="text" name="Title" value="@content.Title" class="form-control" />
+                        <div class="mb-3">
+                            <label>Title</label>
+                            <input type="text" name="Title" value="@content.Title" class="form-control" />
+                        </div>
+                        <div class="alinea-image-left">
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
                             </div>
-                            <div class="row">
-                                <div class="col-3 mb-3 me-auto">
-                                    <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
-                                </div>
-                                <div class="col-9">
-                                    <label>Content</label>
-                                    <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
-                                </div>
+                            <div class="text-content">
+                                <label>Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
+                            </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#6")
+                    {
+                        <div class="alinea-image-left">
+                            <div class="image-wrapper">
+                                @if (!string.IsNullOrEmpty(content.PictureText))
+                                {
+                                    <img src="@content.PictureText" class="content-placeholder-img" style="cursor: pointer; width: 100%; height: auto; display: block;" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                                else
+                                {
+                                    <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                }
+                            </div>
+                            <div class="text-content">
+                                <label>Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 120px;">@content.Content</textarea>
                             </div>
                         </div>
                     }
@@ -266,7 +391,7 @@ else
         <p class="lead">@Model.Description</p>
         @foreach (var content in ViewBag.Contents as List<CmsModern.Models.PageContent>)
         {
-            <div class="content-item mb-4">
+            <div class="content-item">
                 @if (content.Type == "alinea#1")
                 {
                     @if (!string.IsNullOrEmpty(content.Title))
@@ -284,21 +409,21 @@ else
                     {
                         <h3>@content.Title</h3>
                     }
-                    <div class="row">
-                        <div class="col-9">
+                    <div class="alinea-image-right">
+                        <div class="text-content">
                             @if (!string.IsNullOrEmpty(content.Content))
                             {
                                 @Html.Raw(content.Content)
                             }
                         </div>
-                        <div class="col-3 ms-auto">
+                        <div class="image-wrapper">
                             @if (!string.IsNullOrEmpty(content.PictureText))
                             {
-                                <img src="@content.PictureText" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Image" />
+                                <img src="@content.PictureText" alt="Image" />
                             }
                             else
                             {
-                                <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
+                                <img src="/images/placeholder.png" alt="Placeholder" />
                             }
                         </div>
                     </div>
@@ -309,18 +434,67 @@ else
                     {
                         <h3>@content.Title</h3>
                     }
-                    <div class="row">
-                        <div class="col-3 me-auto">
+                    <div class="alinea-image-left">
+                        <div class="image-wrapper">
                             @if (!string.IsNullOrEmpty(content.PictureText))
                             {
-                                <img src="@content.PictureText" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Image" />
+                                <img src="@content.PictureText" alt="Image" />
                             }
                             else
                             {
-                                <img src="/images/placeholder.jpg" class="img-fluid" style="height: 160px; width: 100%; object-fit: contain;" alt="Placeholder" />
+                                <img src="/images/placeholder.png" alt="Placeholder" />
                             }
                         </div>
-                        <div class="col-9">
+                        <div class="text-content">
+                            @if (!string.IsNullOrEmpty(content.Content))
+                            {
+                                @Html.Raw(content.Content)
+                            }
+                        </div>
+                    </div>
+                }
+                else if (content.Type == "alinea#4")
+                {
+                    @if (!string.IsNullOrEmpty(content.Content))
+                    {
+                        <div>@Html.Raw(content.Content)</div>
+                    }
+                }
+                else if (content.Type == "alinea#5")
+                {
+                    <div class="alinea-image-right">
+                        <div class="text-content">
+                            @if (!string.IsNullOrEmpty(content.Content))
+                            {
+                                @Html.Raw(content.Content)
+                            }
+                        </div>
+                        <div class="image-wrapper">
+                            @if (!string.IsNullOrEmpty(content.PictureText))
+                            {
+                                <img src="@content.PictureText" alt="Image" />
+                            }
+                            else
+                            {
+                                <img src="/images/placeholder.png" alt="Placeholder" />
+                            }
+                        </div>
+                    </div>
+                }
+                else if (content.Type == "alinea#6")
+                {
+                    <div class="alinea-image-left">
+                        <div class="image-wrapper">
+                            @if (!string.IsNullOrEmpty(content.PictureText))
+                            {
+                                <img src="@content.PictureText" alt="Image" />
+                            }
+                            else
+                            {
+                                <img src="/images/placeholder.png" alt="Placeholder" />
+                            }
+                        </div>
+                        <div class="text-content">
                             @if (!string.IsNullOrEmpty(content.Content))
                             {
                                 @Html.Raw(content.Content)
@@ -360,9 +534,72 @@ else
     </div>
 }
 
+@if (isAdmin)
+{
+    <div class="modal fade" id="bannerUploadModal" tabindex="-1" aria-labelledby="bannerUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bannerUploadModalLabel">Banner vervangen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data" action="@Url.Action("UploadBanner", "Home")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="pageId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label">Nieuwe banner afbeelding</label>
+                            <input type="file" name="bannerFile" accept="image/png,image/jpeg,image/jpg,image/svg+xml" class="form-control" required />
+                            <div class="form-text">Toegestaan: PNG, JPG, JPEG of SVG.</div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">Uploaden</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="contentImageUploadModal" tabindex="-1" aria-labelledby="contentImageUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contentImageUploadModalLabel">Afbeelding uploaden</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contentImageForm" method="post" enctype="multipart/form-data" action="@Url.Action("UploadContentImage", "Home")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="pageId" value="@Model.Id" />
+                        <input type="hidden" id="contentIdField" name="contentId" value="" />
+                        <div class="mb-3">
+                            <label class="form-label">Nieuwe afbeelding</label>
+                            <input type="file" name="contentImageFile" accept="image/png,image/jpeg,image/jpg,image/svg+xml" class="form-control" required />
+                            <div class="form-text">Toegestaan: PNG, JPG, JPEG of SVG.</div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">Uploaden</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
     <script>
         $(function () {
+            // Handle content image modal - set contentId when opening
+            $('#contentImageUploadModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var contentId = button.data('content-id');
+                $('#contentIdField').val(contentId);
+            });
+
             $('.toggle-card').each(function () {
                 var card = $(this);
                 var view = card.find('.content-view');

@@ -1,5 +1,61 @@
 body {
     padding-top: 20px;
+    font-family: 'Abel', sans-serif;
+}
+
+/* Reduce container max-width by 100px */
+.container {
+    max-width: 1220px;
+}
+
+/* Image layouts for alinea's with images */
+.alinea-image-right {
+    display: flex;
+    gap: 70px;
+    align-items: flex-start;
+}
+
+.alinea-image-right .text-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alinea-image-right .image-wrapper {
+    width: 340px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.alinea-image-left {
+    display: flex;
+    gap: 70px;
+    align-items: flex-start;
+}
+
+.alinea-image-left .text-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alinea-image-left .image-wrapper {
+    width: 340px;
+    flex-shrink: 0;
+    order: -1;
+}
+
+.alinea-image-right img,
+.alinea-image-left img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* All buttons use system font with emoji support for colored icons */
+.btn,
+button {
+    font-family: "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", system-ui, -apple-system, sans-serif;
 }
 
 .login-page {
@@ -49,7 +105,97 @@ body {
     background-color: #f8f9fa;
 }
 
+.toggle-card .card-body {
+    padding-top: 45px;
+}
+
 /* Spacing for edit forms from toolbar buttons */
 .content-edit {
     margin-top: 25px;
+}
+
+/* Ensure alinea layouts work inside forms */
+.content-edit .alinea-image-right,
+.content-edit .alinea-image-left {
+    display: flex;
+}
+
+/* Content placeholder images in edit mode - clickable with hover effect */
+.content-placeholder-img {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    border-radius: 8px;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.content-placeholder-img:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+/* Match content text style to page description (lead) */
+.content-item,
+.content-view {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+.content-item {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.content-item:last-child {
+    margin-bottom: 80px;
+}
+
+/* Page title tweaks: smaller and centered */
+.content-view h1.display-4,
+.text-start h1.display-4 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: calc(1.2rem + 20px);
+}
+
+/* Banner overlay upload control */
+.page-banner-wrapper {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    margin-top: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.page-banner-wrapper.banner-has-image {
+    margin-top: -12px;
+    border-top: 2px rgba(0, 0, 0, 0.3) solid;
+    border-bottom: 2px rgba(0, 0, 0, 0.3) solid;
+}
+
+.page-banner-wrapper.banner-empty {
+    margin-top: -2px;
+    min-height: 160px;
+    border-top: 2px rgba(0, 0, 0, 0.3) solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(120deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.page-banner-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.banner-upload-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
 }

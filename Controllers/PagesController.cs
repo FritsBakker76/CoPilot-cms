@@ -129,7 +129,7 @@ namespace CmsModern.Controllers
         // POST: Pages/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Content,GoogleTitle,GoogleDescription,BannerPath")] Page page, IFormFile bannerFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,MenuItem,GoogleTitle,GoogleDescription,BannerPath")] Page page, IFormFile bannerFile)
         {
             if (id != page.Id) return NotFound();
             if (ModelState.IsValid)
@@ -141,7 +141,7 @@ namespace CmsModern.Controllers
                 // Update properties from the form
                 existingPage.Title = page.Title;
                 existingPage.Description = page.Description;
-                existingPage.Content = page.Content;
+                existingPage.MenuItem = page.MenuItem;
                 existingPage.GoogleTitle = page.GoogleTitle;
                 existingPage.GoogleDescription = page.GoogleDescription;
 
