@@ -98,6 +98,27 @@ button {
 .toggle-card {
     transition: background-color 160ms ease;
 }
+
+/* Template cards on PageTemplates page */
+.template-card {
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.template-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    border-color: #0d6efd !important;
+}
+
+.template-card:active {
+    transform: translateY(-2px);
+}
+
+/* Hide move buttons when card is in edit mode */
+.card-editing .action-group form {
+    display: none !important;
+}
 .toggle-card:hover {
     background-color: #f8f9fa;
 }
