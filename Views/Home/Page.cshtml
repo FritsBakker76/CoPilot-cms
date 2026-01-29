@@ -23,11 +23,10 @@ else if (TempData["Error"] != null)
     </div>
 }
 
-<div class="page-banner-wrapper @(hasBanner ? "banner-has-image" : "banner-empty")">
-    @if (hasBanner)
-    {
-        <img src="@Model.BannerPath" alt="Page banner" class="page-banner-image" />
-    }
+@if (hasBanner)
+{
+<div class="page-banner-wrapper banner-has-image">
+    <img src="@Model.BannerPath" alt="Page banner" class="page-banner-image" />
     @if (isAdmin)
     {
         <button type="button" class="btn btn-light btn-sm banner-upload-btn" data-bs-toggle="modal" data-bs-target="#bannerUploadModal" aria-label="Banner uploaden">
@@ -35,6 +34,15 @@ else if (TempData["Error"] != null)
         </button>
     }
 </div>
+}
+else if (isAdmin)
+{
+    <div class="banner-upload-placeholder">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bannerUploadModal">
+            📷 Banner uploaden
+        </button>
+    </div>
+}
 
 @if (User.Identity.IsAuthenticated)
 {

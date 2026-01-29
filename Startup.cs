@@ -33,7 +33,7 @@ namespace CmsModern
                     options.LoginPath = "/login";
                 });
             services.AddDbContext<CmsDbContext>(options =>
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), ServerVersion.AutoDetect(Configuration.GetConnectionString("DefaultConnection"))));
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 21))));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -78,6 +78,23 @@ namespace CmsModern
             {
                 var context = scope.ServiceProvider.GetRequiredService<CmsDbContext>();
                 context.Database.EnsureCreated();
+                context.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS pages (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    title VARCHAR(255),
+                    description TEXT,
+                    menu_item VARCHAR(255),
+                    google_title VARCHAR(255),
+                    google_description TEXT,
+                    banner_path VARCHAR(500),
+                    created_at DATETIME,
+                    updated_at DATETIME
+                );");
+                context.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(50) NOT NULL UNIQUE,
+                    password_hash VARCHAR(255) NOT NULL,
+                    is_admin BOOLEAN DEFAULT FALSE
+                );");
                 context.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS pagecontent (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     title VARCHAR(255),
@@ -171,14 +188,6 @@ namespace CmsModern
                     // Ignore if the column already exists or the check fails; startup should continue.
                 }
                 
-                // Columns are included in the CREATE TABLE IF NOT EXISTS statement above; no extra ALTERs needed
-                // Insert sample data if not exists
-                if (!context.PageContents.Any())
-                {
-                    context.Database.ExecuteSqlRaw(@"INSERT INTO pagecontent (title, content, link, price, duration, pictureText, type, pageId, position) VALUES
-                        ('Hero Section', 'Welcome to our amazing website!', 'https://example.com', 0.00, 'N/A', 'Hero image', 'hero', 1, 1),
-                        ('About Us', 'We are a great company.', NULL, NULL, NULL, NULL, 'text', 1, 2);");
-                }
                 if (!context.Pages.Any())
                 {
                     context.Pages.AddRange(
