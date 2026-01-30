@@ -1,89 +1,128 @@
-<div class="d-flex align-items-center justify-content-between mb-4 mt-3">
-    <h1 class="m-0">Admin</h1>
-    <div class="btn-group">
-        <a href="@Url.Action("Index", "Pages")" class="btn btn-primary">Website pagina's</a>
-        <a href="@Url.Action("Users", "Pages")" class="btn btn-outline-primary">Website users</a>
-        <a href="@Url.Action("Settings", "Pages")" class="btn btn-outline-primary">Website instellingen</a>
-    </div>
+<div class="mb-4 mt-3">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="@Url.Action("Index", "Pages")">Website pagina's</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Users", "Pages")">Website users</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Settings", "Pages")">Website instellingen</a>
+        </li>
+    </ul>
 </div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="container py-4">
 <style>
     .table th:nth-child(1),
     .table td:nth-child(1) {
-        width: 25%;
+        width: 23%;
     }
     .table th:nth-child(2),
     .table td:nth-child(2) {
-        width: 16.67%;
+        width: 14%;
     }
     .table th:nth-child(3),
     .table td:nth-child(3) {
-        width: 25%;
+        width: 18%;
     }
     .table th:nth-child(4),
     .table td:nth-child(4) {
-        width: 33.33%;
+        width: 30%;
+    }
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        width: 17%;
     }
     .table {
         table-layout: fixed;
     }
 </style>
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Pagina Titel</th>
             <th>Menu Item</th>
             <th>Google Titel</th>
             <th>Google Omschrijving</th>
-            <th>Acties</th>
+            <th class="text-end">Acties</th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var p in Model)
+    @{
+        var pagesList = Model;
+    }
+    @for (int i = 0; i < pagesList.Count; i++)
     {
+        var p = pagesList[i];
+        var isFirst = i == 0;
+        var isLast = i == pagesList.Count - 1;
         <tr class="page-row" data-page-id="@p.Id">
-            <td class="view-mode">
-                <span class="page-title">@p.Title</span>
+            <td>
+                <span class="view-mode">@p.Title</span>
+                <input type="text" class="edit-mode d-none form-control form-control-sm" value="@p.Title" data-field="Title" />
             </td>
-            <td class="view-mode">
-                <span class="page-menu-item">@p.MenuItem</span>
+            <td>
+                <span class="view-mode">@p.MenuItem</span>
+                <input type="text" class="edit-mode d-none form-control form-control-sm" value="@p.MenuItem" data-field="MenuItem" />
             </td>
-            <td class="view-mode">
-                <span class="page-google-title">@p.GoogleTitle</span>
+            <td>
+                <span class="view-mode">@p.GoogleTitle</span>
+                <input type="text" class="edit-mode d-none form-control form-control-sm" value="@p.GoogleTitle" data-field="GoogleTitle" />
             </td>
-            <td class="view-mode">
-                <span class="page-google-description">@p.GoogleDescription</span>
+            <td>
+                <span class="view-mode">@p.GoogleDescription</span>
+                <textarea class="edit-mode d-none form-control form-control-sm" rows="3" data-field="GoogleDescription">@p.GoogleDescription</textarea>
             </td>
-            <td class="view-mode">
-                <button class="btn btn-primary btn-sm edit-btn" type="button">Aanpassen</button>
-            </td>
-        </tr>
-        <tr class="edit-mode d-none" data-page-id="@p.Id">
-            <form class="page-edit-form" method="post" action="@Url.Action("Edit", new { id = p.Id })" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="Id" value="@p.Id" />
-                <input type="hidden" name="Description" value="@p.Description" />
-                <td>
-                    <input type="text" name="Title" class="form-control form-control-sm" value="@p.Title" />
-                </td>
-                <td>
-                    <input type="text" name="MenuItem" class="form-control form-control-sm" value="@p.MenuItem" />
-                </td>
-                <td>
-                    <input type="text" name="GoogleTitle" class="form-control form-control-sm" value="@p.GoogleTitle" />
-                </td>
-                <td>
-                    <input type="text" name="GoogleDescription" class="form-control form-control-sm" value="@p.GoogleDescription" />
-                </td>
-                <td>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success btn-sm">Opslaan</button>
+            <td>
+                <div class="view-mode d-flex gap-1 align-items-center justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm edit-btn btn-icon-label" type="button">✏ <span class="btn-label">aanpassen</span></button>
+                    <form method="post" action="@Url.Action("MoveUp", new { id = p.Id })" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="Plaats hoger" @(isFirst ? "disabled" : "")>▲</button>
+                    </form>
+                    <form method="post" action="@Url.Action("MoveDown", new { id = p.Id })" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="Plaats lager" @(isLast ? "disabled" : "")>▼</button>
+                    </form>
+                </div>
+                <div class="edit-mode d-none">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-success btn-sm save-btn">Opslaan</button>
                         <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
                     </div>
-                </td>
-            </form>
+                </div>
+            </td>
         </tr>
     }
+    <tr class="new-page-row">
+        <form method="post" action="@Url.Action("Create")" class="new-page-form">
+            @Html.AntiForgeryToken()
+            <td>
+                <input type="text" name="Title" class="form-control form-control-sm" placeholder="Nieuwe pagina titel" required />
+            </td>
+            <td>
+                <input type="text" name="MenuItem" class="form-control form-control-sm" placeholder="Menu item" />
+            </td>
+            <td>
+                <input type="text" name="GoogleTitle" class="form-control form-control-sm" placeholder="Google titel" />
+            </td>
+            <td>
+                <textarea name="GoogleDescription" class="form-control form-control-sm" rows="3" placeholder="Google omschrijving"></textarea>
+            </td>
+            <td class="text-end">
+                <button type="submit" class="btn btn-success btn-sm">Pagina toevoegen</button>
+            </td>
+        </form>
+    </tr>
     </tbody>
 </table>
 </div>
@@ -92,85 +131,79 @@
     document.addEventListener('DOMContentLoaded', function () {
         const editBtns = document.querySelectorAll('.edit-btn');
         const cancelBtns = document.querySelectorAll('.cancel-btn');
+        const saveBtns = document.querySelectorAll('.save-btn');
 
         editBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const row = this.closest('.page-row');
-                const pageId = row.getAttribute('data-page-id');
-                const editRow = document.querySelector(`.edit-mode[data-page-id="${pageId}"]`);
-                row.classList.add('d-none');
-                editRow.classList.remove('d-none');
+                const viewElements = row.querySelectorAll('.view-mode');
+                const editElements = row.querySelectorAll('.edit-mode');
+                
+                viewElements.forEach(el => el.classList.add('d-none'));
+                editElements.forEach(el => el.classList.remove('d-none'));
             });
         });
 
         cancelBtns.forEach(btn => {
             btn.addEventListener('click', function () {
-                const editRow = this.closest('.edit-mode');
-                const pageId = editRow.getAttribute('data-page-id');
-                const viewRow = document.querySelector(`.page-row[data-page-id="${pageId}"]`);
-                editRow.classList.add('d-none');
-                viewRow.classList.remove('d-none');
+                const row = this.closest('.page-row');
+                const viewElements = row.querySelectorAll('.view-mode');
+                const editElements = row.querySelectorAll('.edit-mode');
+                
+                editElements.forEach(el => el.classList.add('d-none'));
+                viewElements.forEach(el => el.classList.remove('d-none'));
             });
         });
 
-        // AJAX form submission
-        const forms = document.querySelectorAll('.page-edit-form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const submitBtn = e.submitter || this.querySelector('.btn-success');
+        saveBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.page-row');
+                const pageId = row.getAttribute('data-page-id');
+                const formData = new FormData();
                 
-                if (!submitBtn) {
-                    console.error('Submit button not found');
-                    this.submit();
-                    return;
+                formData.append('Id', pageId);
+                formData.append('Title', row.querySelector('[data-field="Title"]').value);
+                formData.append('MenuItem', row.querySelector('[data-field="MenuItem"]').value);
+                formData.append('GoogleTitle', row.querySelector('[data-field="GoogleTitle"]').value);
+                formData.append('GoogleDescription', row.querySelector('[data-field="GoogleDescription"]').value);
+                
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    formData.append('__RequestVerificationToken', token.value);
                 }
                 
-                const originalText = submitBtn.textContent;
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Opslaan...';
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = 'Opslaan...';
 
-                fetch(this.action, {
+                fetch('@Url.Action("Edit", "Pages")', {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => {
                     if (response.ok) {
-                        // Update only this specific row
-                        const editRow = this.closest('.edit-mode');
-                        const pageId = editRow.getAttribute('data-page-id');
-                        const viewRow = document.querySelector(`.page-row[data-page-id="${pageId}"]`);
+                        // Update view mode spans
+                        const spans = row.querySelectorAll('td > .view-mode');
+                        spans[0].textContent = formData.get('Title') || '';
+                        spans[1].textContent = formData.get('MenuItem') || '';
+                        spans[2].textContent = formData.get('GoogleTitle') || '';
+                        spans[3].textContent = formData.get('GoogleDescription') || '';
                         
-                        if (viewRow) {
-                            // Update view row with new values
-                            const titleSpan = viewRow.querySelector('.page-title');
-                            const menuItemSpan = viewRow.querySelector('.page-menu-item');
-                            const googleTitleSpan = viewRow.querySelector('.page-google-title');
-                            const googleDescSpan = viewRow.querySelector('.page-google-description');
-                            
-                            if (titleSpan) titleSpan.textContent = formData.get('Title') || '';
-                            if (menuItemSpan) menuItemSpan.textContent = formData.get('MenuItem') || '';
-                            if (googleTitleSpan) googleTitleSpan.textContent = formData.get('GoogleTitle') || '';
-                            if (googleDescSpan) googleDescSpan.textContent = formData.get('GoogleDescription') || '';
-                            
-                            // Switch back to view mode for this row only
-                            editRow.classList.add('d-none');
-                            viewRow.classList.remove('d-none');
-                        }
+                        // Switch back to view mode
+                        row.querySelectorAll('.edit-mode').forEach(el => el.classList.add('d-none'));
+                        row.querySelectorAll('.view-mode').forEach(el => el.classList.remove('d-none'));
                         
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
+                        btn.textContent = originalText;
+                        btn.disabled = false;
                     } else {
                         throw new Error('Save failed');
                     }
                 })
                 .catch(error => {
                     alert('Fout bij opslaan. Probeer het opnieuw.');
-                    if (submitBtn) {
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                 });
             });
         });

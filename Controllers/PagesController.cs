@@ -29,7 +29,30 @@ namespace CmsModern.Controllers
         // GET: Pages
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Pages.ToListAsync());
+            var pages = await _context.Pages.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToListAsync();
+            return View(pages);
+        }
+
+        // POST: Pages/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Title,Description,MenuItem,GoogleTitle,GoogleDescription")] Page page)
+        {
+            if (!(User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True")))
+            {
+                return Forbid();
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Set display order to max + 1
+                var maxOrder = await _context.Pages.AnyAsync() ? await _context.Pages.MaxAsync(p => p.DisplayOrder) : 0;
+                page.DisplayOrder = maxOrder + 1;
+                _context.Add(page);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Nieuwe pagina succesvol toegevoegd.";
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Admin Settings
@@ -256,6 +279,62 @@ namespace CmsModern.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Users));
+        }
+
+        // POST: Pages/MoveUp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveUp(int id)
+        {
+            if (!(User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True")))
+            {
+                return Forbid();
+            }
+
+            var currentPage = await _context.Pages.FindAsync(id);
+            if (currentPage == null) return NotFound();
+
+            var pages = await _context.Pages.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToListAsync();
+            var currentIndex = pages.FindIndex(p => p.Id == id);
+
+            if (currentIndex > 0)
+            {
+                var previousPage = pages[currentIndex - 1];
+                var tempOrder = currentPage.DisplayOrder;
+                currentPage.DisplayOrder = previousPage.DisplayOrder;
+                previousPage.DisplayOrder = tempOrder;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Pages/MoveDown
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveDown(int id)
+        {
+            if (!(User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True")))
+            {
+                return Forbid();
+            }
+
+            var currentPage = await _context.Pages.FindAsync(id);
+            if (currentPage == null) return NotFound();
+
+            var pages = await _context.Pages.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).ToListAsync();
+            var currentIndex = pages.FindIndex(p => p.Id == id);
+
+            if (currentIndex < pages.Count - 1)
+            {
+                var nextPage = pages[currentIndex + 1];
+                var tempOrder = currentPage.DisplayOrder;
+                currentPage.DisplayOrder = nextPage.DisplayOrder;
+                nextPage.DisplayOrder = tempOrder;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

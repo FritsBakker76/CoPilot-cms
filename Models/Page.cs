@@ -17,6 +17,8 @@ namespace CmsModern.Models
         public string GoogleDescription { get; set; }
         [Column("banner_path")]
         public string BannerPath { get; set; }
+        [Column("display_order")]
+        public int DisplayOrder { get; set; }
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
         [Column("updated_at")]

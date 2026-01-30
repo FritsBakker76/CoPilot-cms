@@ -2,103 +2,239 @@
 @{
     ViewData["Title"] = "Users";
 }
-<div class="d-flex align-items-center justify-content-between mb-4 mt-3">
-    <h1 class="m-0">Admin</h1>
-    <div class="btn-group">
-        <a href="@Url.Action("Index", "Pages")" class="btn btn-outline-primary">Website pagina's</a>
-        <a href="@Url.Action("Users", "Pages")" class="btn btn-primary">Website users</a>
-        <a href="@Url.Action("Settings", "Pages")" class="btn btn-outline-primary">Website instellingen</a>
-    </div>
+<div class="mb-4 mt-3">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Index", "Pages")">Website pagina's</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="@Url.Action("Users", "Pages")">Website users</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Settings", "Pages")">Website instellingen</a>
+        </li>
+    </ul>
 </div>
-<div class="container py-4">
-<h2>Users</h2>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-success">@TempData["Message"]</div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">@TempData["Error"]</div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
-<!-- Add User Form -->
-<h3>Add New User</h3>
-<form method="post" action="/admin/CreateUser">
-    @Html.AntiForgeryToken()
-    <div class="row mb-3">
-        <div class="col-md-3">
-            <input type="text" name="username" class="form-control" placeholder="Username" required />
-        </div>
-        <div class="col-md-3">
-            <input type="password" name="password" class="form-control" placeholder="Password" required />
-        </div>
-        <div class="col-md-2">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="isAdmin" id="isAdminNew">
-                <label class="form-check-label" for="isAdminNew">
-                    Admin
-                </label>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-success">Add User</button>
-        </div>
-    </div>
-</form>
-
-<table class="table">
+<div class="container py-4">
+<style>
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 25%;
+    }
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 15%;
+    }
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 30%;
+    }
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 32%;
+    }
+    .table {
+        table-layout: fixed;
+    }
+</style>
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>Username</th>
+            <th>Gebruikersnaam</th>
             <th>Is Admin</th>
-            <th>Actions</th>
+            <th>Wachtwoord</th>
+            <th class="text-end">Acties</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model)
-        {
-            if (user.Id == ViewBag.EditId)
-            {
-                <!-- Edit Form -->
-                <tr>
-                    <form method="post" action="/admin/EditUser">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@user.Id" />
-                        <td><input type="text" name="username" value="@user.Username" class="form-control" required /></td>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="isAdmin" @(user.IsAdmin ? "checked" : "") />
-                            </div>
-                        </td>
-                        <td>
-                            <input type="password" name="password" class="form-control" placeholder="New Password (leave empty to keep)" />
-                            <button type="submit" class="btn btn-primary btn-sm mt-1">Save</button>
-                            <a href="@Url.Action("Users")" class="btn btn-secondary btn-sm mt-1">Cancel</a>
-                        </td>
-                    </form>
-                </tr>
-            }
-            else
-            {
-                <!-- Display Row -->
-                <tr>
-                    <td>@user.Username</td>
-                    <td>@(user.IsAdmin ? "Yes" : "No")</td>
-                    <td>
-                        <a href="@Url.Action("Users", new { editId = user.Id })" class="btn btn-warning btn-sm">Edit</a>
+    @{
+        var usersList = Model.ToList();
+    }
+    @for (int i = 0; i < usersList.Count; i++)
+    {
+        var user = usersList[i];
+        <tr class="user-row" data-user-id="@user.Id">
+            <td>
+                <span class="view-mode">@user.Username</span>
+                <input type="text" class="edit-mode d-none form-control form-control-sm" value="@user.Username" data-field="username" required />
+            </td>
+            <td>
+                <span class="view-mode">@(user.IsAdmin ? "Ja" : "Nee")</span>
+                <div class="edit-mode d-none form-check mt-2">
+                    <input class="form-check-input" type="checkbox" data-field="isAdmin" id="isAdmin@user.Id" @(user.IsAdmin ? "checked" : "") />
+                    <label class="form-check-label" for="isAdmin@user.Id">Admin</label>
+                </div>
+            </td>
+            <td>
+                <span class="view-mode">-</span>
+                <input type="password" class="edit-mode d-none form-control form-control-sm" data-field="password" placeholder="Nieuw wachtwoord (optioneel)" />
+            </td>
+            <td>
+                <div class="view-mode text-end">
+                    @if (user.Username != "admin")
+                    {
+                        <button class="btn btn-outline-primary btn-sm edit-btn btn-icon-label" type="button">✏ <span class="btn-label">aanpassen</span></button>
+                    }
+                </div>
+                <div class="edit-mode d-none">
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button type="button" class="btn btn-success btn-sm save-btn">Opslaan</button>
+                        <button type="button" class="btn btn-secondary btn-sm cancel-btn">Annuleren</button>
                         @if (user.Username != "admin")
                         {
-                            <form method="post" action="/admin/DeleteUser">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@user.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
+                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-user-id="@user.Id">Verwijderen</button>
                         }
-                    </td>
-                </tr>
-            }
-        }
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    <tr class="new-user-row">
+        <form method="post" action="@Url.Action("CreateUser", "Pages")" class="new-user-form" style="display: contents;">
+            @Html.AntiForgeryToken()
+            <td>
+                <input type="text" name="username" class="form-control form-control-sm" placeholder="Gebruikersnaam" required />
+            </td>
+            <td>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="isAdmin" id="isAdminNew" />
+                    <label class="form-check-label" for="isAdminNew">Admin</label>
+                </div>
+            </td>
+            <td>
+                <input type="password" name="password" class="form-control form-control-sm" placeholder="Wachtwoord" required />
+            </td>
+            <td class="text-end">
+                <button type="submit" class="btn btn-success btn-sm">Gebruiker toevoegen</button>
+            </td>
+        </form>
+    </tr>
     </tbody>
 </table>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editBtns = document.querySelectorAll('.edit-btn');
+        const cancelBtns = document.querySelectorAll('.cancel-btn');
+        const saveBtns = document.querySelectorAll('.save-btn');
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.user-row');
+                const viewElements = row.querySelectorAll('.view-mode');
+                const editElements = row.querySelectorAll('.edit-mode');
+
+                viewElements.forEach(el => el.classList.add('d-none'));
+                editElements.forEach(el => el.classList.remove('d-none'));
+            });
+        });
+
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.user-row');
+                const viewElements = row.querySelectorAll('.view-mode');
+                const editElements = row.querySelectorAll('.edit-mode');
+
+                editElements.forEach(el => el.classList.add('d-none'));
+                viewElements.forEach(el => el.classList.remove('d-none'));
+            });
+        });
+
+        saveBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.user-row');
+                const userId = row.getAttribute('data-user-id');
+                const formData = new FormData();
+                
+                formData.append('id', userId);
+                formData.append('username', row.querySelector('[data-field="username"]').value);
+                formData.append('isAdmin', row.querySelector('[data-field="isAdmin"]').checked);
+                const password = row.querySelector('[data-field="password"]').value;
+                if (password) {
+                    formData.append('password', password);
+                }
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    formData.append('__RequestVerificationToken', token.value);
+                }
+                
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = 'Opslaan...';
+
+                fetch('@Url.Action("EditUser", "Pages")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Update view mode spans
+                        const spans = row.querySelectorAll('td > .view-mode');
+                        spans[0].textContent = formData.get('username') || '';
+                        spans[1].textContent = formData.get('isAdmin') === 'true' ? 'Ja' : 'Nee';
+                        
+                        // Switch back to view mode
+                        row.querySelectorAll('.edit-mode').forEach(el => el.classList.add('d-none'));
+                        row.querySelectorAll('.view-mode').forEach(el => el.classList.remove('d-none'));
+                        
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    } else {
+                        throw new Error('Save failed');
+                    }
+                })
+                .catch(error => {
+                    alert('Fout bij opslaan. Probeer het opnieuw.');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                });
+            });
+        });
+
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                if (!confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                    return;
+                }
+                e.preventDefault();
+                const userId = this.getAttribute('data-user-id');
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("DeleteUser", "Pages")';
+                
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = 'id';
+                inputId.value = userId;
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenClone = token.cloneNode(true);
+                    form.appendChild(tokenClone);
+                }
+                form.appendChild(inputId);
+                document.body.appendChild(form);
+                form.submit();
+            });
+        });
+    });
+</script>

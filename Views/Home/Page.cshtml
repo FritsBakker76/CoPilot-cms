@@ -27,21 +27,7 @@ else if (TempData["Error"] != null)
 {
 <div class="page-banner-wrapper banner-has-image">
     <img src="@Model.BannerPath" alt="Page banner" class="page-banner-image" />
-    @if (isAdmin)
-    {
-        <button type="button" class="btn btn-light btn-sm banner-upload-btn" data-bs-toggle="modal" data-bs-target="#bannerUploadModal" aria-label="Banner uploaden">
-            📷
-        </button>
-    }
 </div>
-}
-else if (isAdmin)
-{
-    <div class="banner-upload-placeholder">
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bannerUploadModal">
-            📷 Banner uploaden
-        </button>
-    </div>
 }
 
 @if (User.Identity.IsAuthenticated)
@@ -49,6 +35,9 @@ else if (isAdmin)
     <div class="d-flex justify-content-end align-items-center gap-2 mb-3 mt-3">
         @if (ViewBag.EditMode != null && (bool)ViewBag.EditMode)
         {
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bannerUploadModal">
+                📷 Banner @(hasBanner ? "vervangen" : "uploaden")
+            </button>
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="addDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     Alinea toevoegen
@@ -548,23 +537,36 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bannerUploadModalLabel">Banner vervangen</h5>
+                    <h5 class="modal-title" id="bannerUploadModalLabel">@(hasBanner ? "Banner vervangen" : "Banner toevoegen")</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="@Url.Action("UploadBanner", "Home")">
+                    <form method="post" enctype="multipart/form-data" action="@Url.Action("UploadBanner", "Home")" id="uploadBannerForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="pageId" value="@Model.Id" />
                         <div class="mb-3">
-                            <label class="form-label">Nieuwe banner afbeelding</label>
+                            <label class="form-label">@(hasBanner ? "Nieuwe" : "") banner afbeelding</label>
                             <input type="file" name="bannerFile" accept="image/png,image/jpeg,image/jpg,image/svg+xml" class="form-control" required />
                             <div class="form-text">Toegestaan: PNG, JPG, JPEG of SVG.</div>
                         </div>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
-                            <button type="submit" class="btn btn-primary">Uploaden</button>
-                        </div>
                     </form>
+                    @if (hasBanner)
+                    {
+                        <form method="post" action="@Url.Action("DeleteBanner", "Home")" id="deleteBannerForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="pageId" value="@Model.Id" />
+                        </form>
+                    }
+                    <div class="d-flex @(hasBanner ? "justify-content-between" : "justify-content-end") gap-2 mt-3">
+                        @if (hasBanner)
+                        {
+                            <button type="submit" form="deleteBannerForm" class="btn btn-danger" onclick="return confirm('Weet je zeker dat je deze banner wilt verwijderen?');">Verwijderen</button>
+                        }
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                            <button type="submit" form="uploadBannerForm" class="btn btn-primary">Uploaden</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

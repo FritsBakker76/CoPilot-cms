@@ -276,6 +276,36 @@ namespace CmsModern.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public IActionResult DeleteBanner(int pageId)
+        {
+            var page = _context.Pages.Find(pageId);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
+            if (!isAdmin)
+            {
+                return Forbid();
+            }
+
+            if (!string.IsNullOrWhiteSpace(page.BannerPath))
+            {
+                var oldFilePath = Path.Combine(_env.WebRootPath, page.BannerPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+                page.BannerPath = null;
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Page", new { id = pageId, edit = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UploadContentImage(int pageId, int contentId, IFormFile contentImageFile)
         {
             var content = _context.PageContents.FirstOrDefault(pc => pc.Id == contentId && pc.PageId == pageId);

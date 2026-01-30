@@ -188,6 +188,38 @@ namespace CmsModern
                     // Ignore if the column already exists or the check fails; startup should continue.
                 }
                 
+                // Add display_order column to pages table if it doesn't exist
+                try
+                {
+                    var provider = context.Database.ProviderName ?? string.Empty;
+                    var conn = context.Database.GetDbConnection();
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    using var cmd = conn.CreateCommand();
+                    if (provider.IndexOf("mysql", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pages' AND COLUMN_NAME = 'display_order';";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('pages') WHERE name = 'display_order';";
+                    }
+
+                    var exists = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    if (!exists)
+                    {
+                        context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN display_order INT NOT NULL DEFAULT 0");
+                        // Set display_order to Id for existing pages
+                        context.Database.ExecuteSqlRaw("UPDATE pages SET display_order = id WHERE display_order = 0");
+                    }
+                }
+                catch
+                {
+                    // Ignore if the column already exists or the check fails; startup should continue.
+                }
+                
                 if (!context.Pages.Any())
                 {
                     context.Pages.AddRange(

@@ -68,7 +68,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav" style="margin-left: 100px;">
-                    @foreach (var p in pages.OrderBy(x => x.Id))
+                    @foreach (var p in pages.OrderBy(x => x.DisplayOrder).ThenBy(x => x.Id))
                     {
                         var isActive = Context.Request.Path == "/Home/Page/" + p.Id;
                         var menuText = !string.IsNullOrWhiteSpace(p.MenuItem) ? p.MenuItem : p.Title;

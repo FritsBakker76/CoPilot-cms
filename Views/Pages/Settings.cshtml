@@ -2,21 +2,30 @@
 @{
     ViewData["Title"] = "Website instellingen";
 }
-<div class="d-flex align-items-center justify-content-between mb-4 mt-3">
-    <h1 class="m-0">Admin</h1>
-    <div class="btn-group">
-        <a href="@Url.Action("Index", "Pages")" class="btn btn-outline-primary">Website pagina's</a>
-        <a href="@Url.Action("Users", "Pages")" class="btn btn-outline-primary">Website users</a>
-        <a href="@Url.Action("Settings", "Pages")" class="btn btn-primary">Website instellingen</a>
-    </div>
+<div class="mb-4 mt-3">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Index", "Pages")">Website pagina's</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="@Url.Action("Users", "Pages")">Website users</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="@Url.Action("Settings", "Pages")">Website instellingen</a>
+        </li>
+    </ul>
 </div>
 <div class="container py-4">
-    <h2 class="mb-3">Website instellingen</h2>
     @if (TempData["Message"] != null)
     {
         <div class="alert alert-success">@TempData["Message"]</div>
     }
-    <form method="post" enctype="multipart/form-data" class="row g-3">
+    <div class="d-flex justify-content-end gap-2 mb-3">
+        <button type="submit" form="settingsForm" class="btn btn-primary">Opslaan</button>
+        <a href="/admin" class="btn btn-secondary d-none" id="cancelBtn">Annuleren</a>
+    </div>
+    <form id="settingsForm" method="post" asp-action="Settings" enctype="multipart/form-data" class="row g-3">
+        @Html.AntiForgeryToken()
         <div class="col-12 col-md-6">
             <div class="card">
                 <div class="card-header">Algemeen</div>
@@ -172,15 +181,39 @@
                 </div>
             </div>
         </div>
-        <div class="col-12">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-primary">Opslaan</button>
-            <a href="/admin" class="btn btn-secondary ms-2">Terug</a>
-        </div>
     </form>
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('settingsForm');
+        const cancelBtn = document.getElementById('cancelBtn');
+        let hasChanges = false;
+
+        // Track form changes
+        form.addEventListener('change', function() {
+            hasChanges = true;
+            cancelBtn.classList.remove('d-none');
+        });
+
+        form.addEventListener('input', function() {
+            hasChanges = true;
+            cancelBtn.classList.remove('d-none');
+        });
+
+        // Reset on submit
+        form.addEventListener('submit', function() {
+            hasChanges = false;
+            cancelBtn.classList.add('d-none');
+        });
+
+        // Warn if leaving with unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
         // Header BG sync
         const headerBgColor = document.getElementById('headerBg');
         const headerBgText = document.getElementById('headerBgText');
