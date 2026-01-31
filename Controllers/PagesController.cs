@@ -62,7 +62,7 @@ namespace CmsModern.Controllers
             {
                 return Forbid();
             }
-            var settings = await _context.WebsiteSettings.FirstOrDefaultAsync();
+            var settings = await _context.WebsiteSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
             if (settings == null)
             {
                 settings = new WebsiteSettings
@@ -92,7 +92,7 @@ namespace CmsModern.Controllers
             {
                 return Forbid();
             }
-            var settings = await _context.WebsiteSettings.FirstOrDefaultAsync();
+            var settings = await _context.WebsiteSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
             if (settings == null)
             {
                 settings = new WebsiteSettings();

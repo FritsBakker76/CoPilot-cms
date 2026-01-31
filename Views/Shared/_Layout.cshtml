@@ -117,7 +117,7 @@
                             <a class="nav-link" href="/admin">ADMIN</a>
                         </li>
                         <li class="nav-item">
-                            <form method="post" action="/Account/Logout" class="d-flex align-items-center m-0">
+                            <form method="post" action="/Account/Logout" class="d-flex align-items-center m-0 me-3">
                                 <button type="submit" class="nav-link px-2 py-2" style="border: none; background: none;">LOGOUT</button>
                             </form>
                         </li>
@@ -125,6 +125,22 @@
                 }
             </div>
         </div>
+        @if (isAdminPage)
+        {
+            <div style="background-color: #f2f2f2;border-bottom: solid 2px #b2b2b2;padding: 0 1rem;width: 100vw;margin-top: 106px;position: fixed !important;color: #555555;height: 30px;align-content: center;z-index: -1;">
+                <ul class="nav ms-auto mb-0" style="gap: 25px;float: right;margin-right: 10px;">
+                    <li class="nav-item">
+                        <a class="nav-link p-0" href="/admin">Website pagina's</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link p-0" href="/admin/Users">Website users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link p-0" href="/admin/Settings">Website instellingen</a>
+                    </li>
+                </ul>
+            </div>
+        }      
     </nav>
     <main style="flex: 1; padding-top: @(ViewBag.HasBanner == true ? "16px" : "50px");">
         <div class="container main-container @(isAdminPage ? "admin-main-container" : "")">
