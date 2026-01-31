@@ -1,11 +1,39 @@
 body {
-    padding-top: 0px !important;
     font-family: 'Abel', sans-serif;
 }
 
 /* Reduce container max-width by 100px */
 .container {
     max-width: 1220px;
+}
+
+/* Wider content area for admin pages only */
+.admin-main-container {
+    max-width: none;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Full-width line with centered admin tabs */
+.admin-tabs {
+    position: relative;
+}
+.admin-tabs::before,
+.admin-tabs::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+.admin-tabs::before {
+    right: 100%;
+    margin-right: 0;
+}
+.admin-tabs::after {
+    left: 100%;
+    margin-left: 0;
 }
 
 /* Image layouts for alinea's with images */
@@ -192,7 +220,7 @@ button {
 }
 
 .page-banner-wrapper.banner-has-image {
-    margin-top: -12px;
+    margin-top: 0;
     border-top: 2px rgba(0, 0, 0, 0.3) solid;
     border-bottom: 2px rgba(0, 0, 0, 0.3) solid;
 }
