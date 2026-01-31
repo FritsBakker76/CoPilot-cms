@@ -153,11 +153,25 @@ else if (TempData["Error"] != null)
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" alt="Image" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@content.PictureText" alt="Image" />
+                                    }
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/placeholder.png" alt="Placeholder" />
+                                    }
                                 }
                             </div>
                         </div>
@@ -178,11 +192,25 @@ else if (TempData["Error"] != null)
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" alt="Image" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@content.PictureText" alt="Image" />
+                                    }
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/placeholder.png" alt="Placeholder" />
+                                    }
                                 }
                             </div>
                         </div>
@@ -193,11 +221,25 @@ else if (TempData["Error"] != null)
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" alt="Image" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@content.PictureText" alt="Image" />
+                                    }
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/placeholder.png" alt="Placeholder" />
+                                    }
                                 }
                             </div>
                             <div class="text-content">
@@ -218,11 +260,25 @@ else if (TempData["Error"] != null)
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
                                 {
-                                    <img src="@content.PictureText" alt="Image" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="@content.PictureText" class="content-placeholder-img" alt="Image" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="@content.PictureText" alt="Image" />
+                                    }
                                 }
                                 else
                                 {
-                                    <img src="/images/placeholder.png" alt="Placeholder" />
+                                    @if (ViewBag.EditMode == true)
+                                    {
+                                        <img src="/images/placeholder.png" class="content-placeholder-img" alt="Placeholder" data-content-id="@content.Id" data-bs-toggle="modal" data-bs-target="#contentImageUploadModal" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/placeholder.png" alt="Placeholder" />
+                                    }
                                 }
                             </div>
                             <div class="text-content">

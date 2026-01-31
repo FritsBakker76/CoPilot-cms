@@ -176,6 +176,7 @@ button {
     width: 100%;
     height: auto;
     display: block;
+    cursor: pointer;
 }
 .content-placeholder-img:hover {
     opacity: 0.8;
