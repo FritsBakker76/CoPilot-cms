@@ -11,7 +11,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-4 mb-4">
+                <div class="col-4 mb-4">
             <form method="post" action="@Url.Action("AddContent", "Home")" class="template-form" style="display: none;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="pageId" value="@pageId" />
@@ -19,9 +19,8 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#1" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #1</h4>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #1 (zonder titel)</h4>
                 <div class="row">
-                    <div class="col-12 mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
                     <div class="col-12"><div class="border p-2 bg-light" style="height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven. Deze alinea is schermvullend</div></div>
                 </div>
             </div>
@@ -34,8 +33,7 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#2" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #2</h4>
-                <div class="mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #2 (zonder titel)</h4>
                 <div class="alinea-image-right" style="gap: 0.5rem;">
                     <div class="text-content"><div class="border p-2 bg-light" style="min-height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven met aan de rechterkant van de tekst een afbeeldingen slideshow.</div></div>
                     <div class="image-wrapper" style="width: 60px; flex-shrink: 0;"><img src="/images/placeholder.png" class="border" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Placeholder" /></div>
@@ -50,8 +48,7 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#3" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #3</h4>
-                <div class="mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #3 (zonder titel)</h4>
                 <div class="alinea-image-left" style="gap: 0.5rem;">
                     <div class="image-wrapper" style="width: 60px; flex-shrink: 0;"><img src="/images/placeholder.png" class="border" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Placeholder" /></div>
                     <div class="text-content"><div class="border p-2 bg-light" style="min-height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven met aan de linkerkant van de tekst een afbeeldingen slideshow.</div></div>
@@ -66,8 +63,9 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#4" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #4 (zonder titel)</h4>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #4</h4>
                 <div class="row">
+                    <div class="col-12 mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
                     <div class="col-12"><div class="border p-2 bg-light" style="height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven. Deze alinea is schermvullend</div></div>
                 </div>
             </div>
@@ -80,7 +78,8 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#5" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #5 (zonder titel)</h4>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #5</h4>
+                <div class="mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
                 <div class="alinea-image-right" style="gap: 0.5rem;">
                     <div class="text-content"><div class="border p-2 bg-light" style="min-height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven met aan de rechterkant van de tekst een afbeeldingen slideshow.</div></div>
                     <div class="image-wrapper" style="width: 60px; flex-shrink: 0;"><img src="/images/placeholder.png" class="border" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Placeholder" /></div>
@@ -95,7 +94,8 @@
                 <input type="hidden" name="position" value="@position" />
             </form>
             <div class="template border p-3 template-card" data-template="alinea#6" style="font-size: 0.85rem;">
-                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #6 (zonder titel)</h4>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Alinea #6</h4>
+                <div class="mb-2"><div class="border p-2 bg-light" style="min-height: 30px; font-size: 0.8rem;">Hier wordt de titel van de alinea weergegeven</div></div>
                 <div class="alinea-image-left" style="gap: 0.5rem;">
                     <div class="image-wrapper" style="width: 60px; flex-shrink: 0;"><img src="/images/placeholder.png" class="border" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Placeholder" /></div>
                     <div class="text-content"><div class="border p-2 bg-light" style="min-height: 80px; font-size: 0.8rem; overflow: hidden;">Hier wordt in tekst van de alinea weergegeven met aan de linkerkant van de tekst een afbeeldingen slideshow.</div></div>

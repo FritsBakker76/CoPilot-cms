@@ -93,11 +93,12 @@
                 <ul class="navbar-nav @menuAlignmentClass" style="@menuAlignmentStyle flex-grow: 0;">
                     @foreach (var p in pages.OrderBy(x => x.DisplayOrder).ThenBy(x => x.Id))
                     {
-                        var isActive = Context.Request.Path == "/Home/Page/" + p.Id;
                         var menuText = !string.IsNullOrWhiteSpace(p.MenuItem) ? p.MenuItem : p.Title;
+                        var pageUrl = !string.IsNullOrWhiteSpace(p.MenuItem) ? "/" + p.MenuItem.Replace(" ", "-").ToLower() : "/Home/Page/" + p.Id;
+                        var isActive = Context.Request.Path.Value.Equals(pageUrl, StringComparison.OrdinalIgnoreCase) || Context.Request.Path == "/Home/Page/" + p.Id;
                         var hasIcon = !string.IsNullOrWhiteSpace(p.MenuIcon);
                         <li class="nav-item @(isActive ? "active" : "")">
-                            <a class="nav-link" href="/Home/Page/@p.Id" @(hasIcon ? $"title={menuText}" : "")>
+                            <a class="nav-link" href="@pageUrl" @(hasIcon ? $"title={menuText}" : "")>
                                 @if (hasIcon)
                                 {
                                     <i class="@p.MenuIcon"></i>

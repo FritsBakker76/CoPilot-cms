@@ -69,6 +69,10 @@ namespace CmsModern
                     pattern: "admin/{action=Index}/{id?}",
                     defaults: new { controller = "Pages" });
                 endpoints.MapControllerRoute(
+                    name: "page-by-menu",
+                    pattern: "{menuItem}",
+                    defaults: new { controller = "Home", action = "PageByMenu" });
+                endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Page}/{id=1}");
             });

@@ -21,8 +21,23 @@ namespace CmsModern.Controllers
             _env = env;
         }
 
+        private IActionResult RedirectToPageByIdOrMenu(int pageId, bool edit = false)
+        {
+            var page = _context.Pages.Find(pageId);
+            if (page != null && !string.IsNullOrEmpty(page.MenuItem))
+            {
+                return RedirectToAction("PageByMenu", new { menuItem = NormalizeMenuItemForUrl(page.MenuItem), edit = edit });
+            }
+            return RedirectToAction("Page", new { id = pageId, edit = edit });
+        }
+
         public IActionResult Index()
         {
+            var firstPage = _context.Pages.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Id).FirstOrDefault();
+            if (firstPage != null && !string.IsNullOrEmpty(firstPage.MenuItem))
+            {
+                return RedirectToAction("PageByMenu", new { menuItem = NormalizeMenuItemForUrl(firstPage.MenuItem) });
+            }
             return RedirectToAction("Page", new { id = 1 });
         }
 
@@ -37,6 +52,27 @@ namespace CmsModern.Controllers
             ViewBag.Contents = contents;
             ViewBag.EditMode = edit && User.Identity.IsAuthenticated;
             return View(page);
+        }
+
+        public IActionResult PageByMenu(string menuItem, bool edit = false)
+        {
+            // Normalize the incoming menu item to match our URL format
+            var normalizedMenuItem = menuItem?.Replace("-", " ");
+            var page = _context.Pages.FirstOrDefault(p => p.MenuItem.ToLower() == normalizedMenuItem.ToLower());
+            if (page == null)
+            {
+                return NotFound();
+            }
+            var contents = _context.PageContents.Where(pc => pc.PageId == page.Id).OrderBy(pc => pc.Position).ToList();
+            ViewBag.Contents = contents;
+            ViewBag.EditMode = edit && User.Identity.IsAuthenticated;
+            return View("Page", page);
+        }
+
+        private string NormalizeMenuItemForUrl(string menuItem)
+        {
+            if (string.IsNullOrEmpty(menuItem)) return menuItem;
+            return menuItem.Replace(" ", "-").ToLower();
         }
 
         [HttpPost]
@@ -65,7 +101,7 @@ namespace CmsModern.Controllers
                 }
             }
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId });
+            return RedirectToPageByIdOrMenu(pageId);
         }
 
         public IActionResult PageTemplates(int pageId, string position = "bottom")
@@ -109,7 +145,7 @@ namespace CmsModern.Controllers
             };
             _context.PageContents.Add(newContent);
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -132,7 +168,7 @@ namespace CmsModern.Controllers
             existing.Duration = model.Duration;
 
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -157,7 +193,7 @@ namespace CmsModern.Controllers
             }
             _context.SaveChanges();
 
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -168,7 +204,7 @@ namespace CmsModern.Controllers
             if (current == null) return NotFound();
 
             var previous = _context.PageContents.FirstOrDefault(pc => pc.PageId == pageId && pc.Position == current.Position - 1);
-            if (previous == null) return RedirectToAction("Page", new { id = pageId, edit = true });
+            if (previous == null) return RedirectToPageByIdOrMenu(pageId, edit: true);
 
             // Swap positions
             var temp = current.Position;
@@ -176,7 +212,7 @@ namespace CmsModern.Controllers
             previous.Position = temp;
 
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -187,7 +223,7 @@ namespace CmsModern.Controllers
             if (current == null) return NotFound();
 
             var next = _context.PageContents.FirstOrDefault(pc => pc.PageId == pageId && pc.Position == current.Position + 1);
-            if (next == null) return RedirectToAction("Page", new { id = pageId, edit = true });
+            if (next == null) return RedirectToPageByIdOrMenu(pageId, edit: true);
 
             // Swap positions
             var temp = current.Position;
@@ -195,7 +231,7 @@ namespace CmsModern.Controllers
             next.Position = temp;
 
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -212,7 +248,7 @@ namespace CmsModern.Controllers
             page.Description = pageDescription;
 
             _context.SaveChanges();
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -234,7 +270,7 @@ namespace CmsModern.Controllers
             if (bannerFile == null || bannerFile.Length == 0)
             {
                 TempData["Error"] = "Selecteer een afbeelding om te uploaden.";
-                return RedirectToAction("Page", new { id = pageId, edit = true });
+                return RedirectToPageByIdOrMenu(pageId, edit: true);
             }
 
             var ext = Path.GetExtension(bannerFile.FileName).ToLowerInvariant();
@@ -242,7 +278,7 @@ namespace CmsModern.Controllers
             if (!allowed.Contains(ext))
             {
                 TempData["Error"] = "Alleen PNG, JPG, JPEG of SVG bestanden zijn toegestaan.";
-                return RedirectToAction("Page", new { id = pageId, edit = true });
+                return RedirectToPageByIdOrMenu(pageId, edit: true);
             }
 
             var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "banners");
@@ -271,7 +307,7 @@ namespace CmsModern.Controllers
             page.BannerPath = $"/uploads/banners/{uniqueFileName}";
             _context.SaveChanges();
 
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -301,7 +337,7 @@ namespace CmsModern.Controllers
                 _context.SaveChanges();
             }
 
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
 
         [HttpPost]
@@ -323,7 +359,7 @@ namespace CmsModern.Controllers
             if (contentImageFile == null || contentImageFile.Length == 0)
             {
                 TempData["Error"] = "Selecteer een afbeelding om te uploaden.";
-                return RedirectToAction("Page", new { id = pageId, edit = true });
+                return RedirectToPageByIdOrMenu(pageId, edit: true);
             }
 
             var ext = Path.GetExtension(contentImageFile.FileName).ToLowerInvariant();
@@ -331,7 +367,7 @@ namespace CmsModern.Controllers
             if (!allowed.Contains(ext))
             {
                 TempData["Error"] = "Alleen PNG, JPG, JPEG of SVG bestanden zijn toegestaan.";
-                return RedirectToAction("Page", new { id = pageId, edit = true });
+                return RedirectToPageByIdOrMenu(pageId, edit: true);
             }
 
             var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "content");
@@ -360,7 +396,7 @@ namespace CmsModern.Controllers
             content.PictureText = $"/uploads/content/{uniqueFileName}";
             _context.SaveChanges();
 
-            return RedirectToAction("Page", new { id = pageId, edit = true });
+            return RedirectToPageByIdOrMenu(pageId, edit: true);
         }
     }
 }

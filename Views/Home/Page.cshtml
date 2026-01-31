@@ -7,6 +7,7 @@
     var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
     var hasBanner = !string.IsNullOrEmpty(Model.BannerPath);
     ViewBag.HasBanner = hasBanner;
+    var pageUrl = !string.IsNullOrEmpty(Model.MenuItem) ? "/" + Model.MenuItem.Replace(" ", "-").ToLower() : "/Home/Page/" + Model.Id;
 }
 
 @if (TempData["Message"] != null)
@@ -52,11 +53,11 @@ else if (TempData["Error"] != null)
                     </li>
                 </ul>
             </div>
-            <a href="@Url.Action("Page", "Home", new { id = Model.Id })" class="btn btn-outline-primary">Aanpassen sluiten</a>
+            <a href="@pageUrl" class="btn btn-outline-primary">Aanpassen sluiten</a>
         }
         else
         {
-            <a href="@Url.Action("Page", "Home", new { id = Model.Id, edit = true })" class="btn btn-outline-primary">Pagina aanpassen</a>
+            <a href="@pageUrl?edit=true" class="btn btn-outline-primary">Pagina aanpassen</a>
         }
     </div>
 }
@@ -124,10 +125,6 @@ else if (TempData["Error"] != null)
                 <div class="content-view">
                     @if (content.Type == "alinea#1")
                     {
-                        @if (!string.IsNullOrEmpty(content.Title))
-                        {
-                            <h3>@content.Title</h3>
-                        }
                         @if (!string.IsNullOrEmpty(content.Content))
                         {
                             <div>@Html.Raw(content.Content)</div>
@@ -135,6 +132,10 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#4")
                     {
+                        @if (!string.IsNullOrEmpty(content.Title))
+                        {
+                            <h3>@content.Title</h3>
+                        }
                         @if (!string.IsNullOrEmpty(content.Content))
                         {
                             <div>@Html.Raw(content.Content)</div>
@@ -142,10 +143,6 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#2")
                     {
-                        @if (!string.IsNullOrEmpty(content.Title))
-                        {
-                            <h3>@content.Title</h3>
-                        }
                         <div class="alinea-image-right">
                             <div class="text-content">
                                 @if (!string.IsNullOrEmpty(content.Content))
@@ -167,6 +164,10 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#5")
                     {
+                        @if (!string.IsNullOrEmpty(content.Title))
+                        {
+                            <h3>@content.Title</h3>
+                        }
                         <div class="alinea-image-right">
                             <div class="text-content">
                                 @if (!string.IsNullOrEmpty(content.Content))
@@ -188,10 +189,6 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#3")
                     {
-                        @if (!string.IsNullOrEmpty(content.Title))
-                        {
-                            <h3>@content.Title</h3>
-                        }
                         <div class="alinea-image-left">
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
@@ -213,6 +210,10 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#6")
                     {
+                        @if (!string.IsNullOrEmpty(content.Title))
+                        {
+                            <h3>@content.Title</h3>
+                        }
                         <div class="alinea-image-left">
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
@@ -263,6 +264,15 @@ else if (TempData["Error"] != null)
                     @if (content.Type == "alinea#1")
                     {
                         <div class="row">
+                            <div class="col-12">
+                                <label style="display: none;">Content</label>
+                                <textarea name="Content" class="form-control" style="min-height: 220px; font-size: 1.25rem;">@content.Content</textarea>
+                            </div>
+                        </div>
+                    }
+                    else if (content.Type == "alinea#4")
+                    {
+                        <div class="row">
                             <div class="col-12 mb-3">
                                 <label>Title</label>
                                 <input type="text" name="Title" value="@content.Title" class="form-control" />
@@ -273,21 +283,8 @@ else if (TempData["Error"] != null)
                             </div>
                         </div>
                     }
-                    else if (content.Type == "alinea#4")
-                    {
-                        <div class="row">
-                            <div class="col-12">
-                                <label style="display: none;">Content</label>
-                                <textarea name="Content" class="form-control" style="min-height: 220px; font-size: 1.25rem;">@content.Content</textarea>
-                            </div>
-                        </div>
-                    }
                     else if (content.Type == "alinea#2")
                     {
-                        <div class="mb-3">
-                            <label>Title</label>
-                            <input type="text" name="Title" value="@content.Title" class="form-control" />
-                        </div>
                         <div class="alinea-image-right">
                             <div class="text-content">
                                 <label style="display: none;">Content</label>
@@ -307,6 +304,10 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#5")
                     {
+                        <div class="mb-3">
+                            <label>Title</label>
+                            <input type="text" name="Title" value="@content.Title" class="form-control" />
+                        </div>
                         <div class="alinea-image-right">
                             <div class="text-content">
                                 <label style="display: none;">Content</label>
@@ -326,10 +327,6 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#3")
                     {
-                        <div class="mb-3">
-                            <label>Title</label>
-                            <input type="text" name="Title" value="@content.Title" class="form-control" />
-                        </div>
                         <div class="alinea-image-left">
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
@@ -349,6 +346,10 @@ else if (TempData["Error"] != null)
                     }
                     else if (content.Type == "alinea#6")
                     {
+                        <div class="mb-3">
+                            <label>Title</label>
+                            <input type="text" name="Title" value="@content.Title" class="form-control" />
+                        </div>
                         <div class="alinea-image-left">
                             <div class="image-wrapper">
                                 @if (!string.IsNullOrEmpty(content.PictureText))
@@ -392,10 +393,6 @@ else
             <div class="content-item">
                 @if (content.Type == "alinea#1")
                 {
-                    @if (!string.IsNullOrEmpty(content.Title))
-                    {
-                        <h3>@content.Title</h3>
-                    }
                     @if (!string.IsNullOrEmpty(content.Content))
                     {
                         <div>@Html.Raw(content.Content)</div>
@@ -403,10 +400,6 @@ else
                 }
                 else if (content.Type == "alinea#2")
                 {
-                    @if (!string.IsNullOrEmpty(content.Title))
-                    {
-                        <h3>@content.Title</h3>
-                    }
                     <div class="alinea-image-right">
                         <div class="text-content">
                             @if (!string.IsNullOrEmpty(content.Content))
@@ -428,10 +421,6 @@ else
                 }
                 else if (content.Type == "alinea#3")
                 {
-                    @if (!string.IsNullOrEmpty(content.Title))
-                    {
-                        <h3>@content.Title</h3>
-                    }
                     <div class="alinea-image-left">
                         <div class="image-wrapper">
                             @if (!string.IsNullOrEmpty(content.PictureText))
@@ -453,6 +442,10 @@ else
                 }
                 else if (content.Type == "alinea#4")
                 {
+                    @if (!string.IsNullOrEmpty(content.Title))
+                    {
+                        <h3>@content.Title</h3>
+                    }
                     @if (!string.IsNullOrEmpty(content.Content))
                     {
                         <div>@Html.Raw(content.Content)</div>
@@ -460,6 +453,10 @@ else
                 }
                 else if (content.Type == "alinea#5")
                 {
+                    @if (!string.IsNullOrEmpty(content.Title))
+                    {
+                        <h3>@content.Title</h3>
+                    }
                     <div class="alinea-image-right">
                         <div class="text-content">
                             @if (!string.IsNullOrEmpty(content.Content))
@@ -481,6 +478,10 @@ else
                 }
                 else if (content.Type == "alinea#6")
                 {
+                    @if (!string.IsNullOrEmpty(content.Title))
+                    {
+                        <h3>@content.Title</h3>
+                    }
                     <div class="alinea-image-left">
                         <div class="image-wrapper">
                             @if (!string.IsNullOrEmpty(content.PictureText))
