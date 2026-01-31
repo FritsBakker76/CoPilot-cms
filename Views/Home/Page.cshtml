@@ -6,6 +6,7 @@
     var contents = ViewBag.Contents as List<CmsModern.Models.PageContent>;
     var isAdmin = User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True");
     var hasBanner = !string.IsNullOrEmpty(Model.BannerPath);
+    ViewBag.HasBanner = hasBanner;
 }
 
 @if (TempData["Message"] != null)
@@ -32,7 +33,7 @@ else if (TempData["Error"] != null)
 
 @if (User.Identity.IsAuthenticated)
 {
-    <div class="d-flex justify-content-end align-items-center gap-2 mb-3 mt-3">
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3 @(hasBanner ? "mt-3" : "")">
         @if (ViewBag.EditMode != null && (bool)ViewBag.EditMode)
         {
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bannerUploadModal">

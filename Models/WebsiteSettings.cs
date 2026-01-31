@@ -28,6 +28,9 @@ namespace CmsModern.Models
         public string MenuTextColor { get; set; }
 
         [MaxLength(20)]
+        public string MenuAlignment { get; set; }
+
+        [MaxLength(20)]
         public string SiteBg { get; set; }
 
         [MaxLength(20)]

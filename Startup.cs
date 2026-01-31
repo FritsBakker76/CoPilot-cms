@@ -115,6 +115,9 @@ namespace CmsModern
                     siteTitle VARCHAR(200),
                     headerBg VARCHAR(20),
                     headerTextColor VARCHAR(20),
+                    menuBg VARCHAR(20),
+                    menuTextColor VARCHAR(20),
+                    menuAlignment VARCHAR(20),
                     siteBg VARCHAR(20),
                     siteTextColor VARCHAR(20),
                     footerBg VARCHAR(20),
@@ -187,6 +190,36 @@ namespace CmsModern
                 {
                     // Ignore if the column already exists or the check fails; startup should continue.
                 }
+
+                // Add menu_icon column to pages table if it doesn't exist
+                try
+                {
+                    var provider = context.Database.ProviderName ?? string.Empty;
+                    var conn = context.Database.GetDbConnection();
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    using var cmd = conn.CreateCommand();
+                    if (provider.IndexOf("mysql", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pages' AND COLUMN_NAME = 'menu_icon';";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('pages') WHERE name = 'menu_icon';";
+                    }
+
+                    var exists = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    if (!exists)
+                    {
+                        context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN menu_icon VARCHAR(100)");
+                    }
+                }
+                catch
+                {
+                    // Ignore if the column already exists or the check fails; startup should continue.
+                }
                 
                 // Add display_order column to pages table if it doesn't exist
                 try
@@ -213,6 +246,36 @@ namespace CmsModern
                         context.Database.ExecuteSqlRaw("ALTER TABLE pages ADD COLUMN display_order INT NOT NULL DEFAULT 0");
                         // Set display_order to Id for existing pages
                         context.Database.ExecuteSqlRaw("UPDATE pages SET display_order = id WHERE display_order = 0");
+                    }
+                }
+                catch
+                {
+                    // Ignore if the column already exists or the check fails; startup should continue.
+                }
+
+                // Add menuAlignment column to websitesettings table if it doesn't exist
+                try
+                {
+                    var provider = context.Database.ProviderName ?? string.Empty;
+                    var conn = context.Database.GetDbConnection();
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    using var cmd = conn.CreateCommand();
+                    if (provider.IndexOf("mysql", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'websitesettings' AND COLUMN_NAME = 'menuAlignment';";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('websitesettings') WHERE name = 'menuAlignment';";
+                    }
+
+                    var exists = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    if (!exists)
+                    {
+                        context.Database.ExecuteSqlRaw("ALTER TABLE websitesettings ADD COLUMN menuAlignment VARCHAR(20)");
                     }
                 }
                 catch

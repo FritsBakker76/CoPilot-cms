@@ -36,7 +36,7 @@ namespace CmsModern.Controllers
         // POST: Pages/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,MenuItem,GoogleTitle,GoogleDescription")] Page page)
+        public async Task<IActionResult> Create([Bind("Title,Description,MenuItem,MenuIcon,GoogleTitle,GoogleDescription")] Page page)
         {
             if (!(User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True")))
             {
@@ -71,6 +71,7 @@ namespace CmsModern.Controllers
                     HeaderBg = "#f8f9fa",
                     SiteBg = "#ffffff",
                     FooterBg = "#f8f9fa",
+                    MenuAlignment = "left",
                     FontPageTitle = 28,
                     FontAlineaTitle = 22,
                     FontWebsiteText = 16,
@@ -103,6 +104,7 @@ namespace CmsModern.Controllers
             settings.HeaderTextColor = model.HeaderTextColor;
             settings.MenuBg = model.MenuBg;
             settings.MenuTextColor = model.MenuTextColor;
+            settings.MenuAlignment = model.MenuAlignment;
             settings.SiteBg = model.SiteBg;
             settings.SiteTextColor = model.SiteTextColor;
             settings.FooterBg = model.FooterBg;
@@ -152,7 +154,7 @@ namespace CmsModern.Controllers
         // POST: Pages/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,MenuItem,GoogleTitle,GoogleDescription,BannerPath")] Page page, IFormFile bannerFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,MenuItem,MenuIcon,GoogleTitle,GoogleDescription,BannerPath")] Page page, IFormFile bannerFile)
         {
             if (id != page.Id) return NotFound();
             if (ModelState.IsValid)
@@ -165,6 +167,7 @@ namespace CmsModern.Controllers
                 existingPage.Title = page.Title;
                 existingPage.Description = page.Description;
                 existingPage.MenuItem = page.MenuItem;
+                existingPage.MenuIcon = page.MenuIcon;
                 existingPage.GoogleTitle = page.GoogleTitle;
                 existingPage.GoogleDescription = page.GoogleDescription;
 
@@ -256,6 +259,12 @@ namespace CmsModern.Controllers
             {
                 return NotFound();
             }
+            // Only the 'admin' user account can edit the admin user
+            if (user.Username == "admin" && !string.Equals(User.Identity?.Name, "admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Only admin can edit the admin user.";
+                return RedirectToAction(nameof(Users));
+            }
             user.Username = username;
             if (!string.IsNullOrEmpty(password))
             {
@@ -264,6 +273,7 @@ namespace CmsModern.Controllers
             user.IsAdmin = isAdmin;
             _context.Update(user);
             await _context.SaveChangesAsync();
+            TempData["Message"] = "User updated successfully.";
             return RedirectToAction(nameof(Users));
         }
 
@@ -277,6 +287,11 @@ namespace CmsModern.Controllers
             {
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = "User deleted successfully.";
+            }
+            else if (user != null && user.Username == "admin")
+            {
+                TempData["Error"] = "The admin user cannot be deleted.";
             }
             return RedirectToAction(nameof(Users));
         }
@@ -334,6 +349,34 @@ namespace CmsModern.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Pages/DeletePage
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePage(int id)
+        {
+            if (!(User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True")))
+            {
+                return Forbid();
+            }
+
+            var page = await _context.Pages.FindAsync(id);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            // Delete associated PageContent items first
+            var contents = await _context.PageContents.Where(c => c.PageId == id).ToListAsync();
+            _context.PageContents.RemoveRange(contents);
+
+            // Delete the page
+            _context.Pages.Remove(page);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Pagina succesvol verwijderd.";
             return RedirectToAction(nameof(Index));
         }
     }

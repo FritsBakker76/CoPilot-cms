@@ -1,5 +1,5 @@
 <div class="mb-4 mt-3">
-    <ul class="nav nav-tabs" role="tablist">
+    <ul class="nav nav-tabs admin-tabs mx-auto" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" href="@Url.Action("Index", "Pages")">Website pagina's</a>
         </li>
@@ -20,30 +20,37 @@
     </div>
 }
 
-<div class="container py-4">
+<div class="py-4" style="padding-left: 10px; padding-right: 10px;">
 <style>
     .table th:nth-child(1),
     .table td:nth-child(1) {
-        width: 23%;
+        width: 16%;
     }
     .table th:nth-child(2),
     .table td:nth-child(2) {
-        width: 14%;
+        width: 11%;
     }
     .table th:nth-child(3),
     .table td:nth-child(3) {
-        width: 18%;
+        width: 9%;
     }
     .table th:nth-child(4),
     .table td:nth-child(4) {
-        width: 30%;
+        width: 16%;
     }
     .table th:nth-child(5),
     .table td:nth-child(5) {
-        width: 17%;
+        width: 24%;
+    }
+    .table th:nth-child(6),
+    .table td:nth-child(6) {
+        width: 24%;
     }
     .table {
         table-layout: fixed;
+    }
+    .icon-preview {
+        font-size: 1.5rem;
     }
 </style>
 <table class="table table-striped">
@@ -51,6 +58,7 @@
         <tr>
             <th>Pagina Titel</th>
             <th>Menu Item</th>
+            <th>Icoon</th>
             <th>Google Titel</th>
             <th>Google Omschrijving</th>
             <th class="text-end">Acties</th>
@@ -75,6 +83,15 @@
                 <input type="text" class="edit-mode d-none form-control form-control-sm" value="@p.MenuItem" data-field="MenuItem" />
             </td>
             <td>
+                <span class="view-mode icon-preview">@(string.IsNullOrEmpty(p.MenuIcon) ? "-" : Html.Raw($"<i class=\"{p.MenuIcon}\"></i>"))</span>
+                <div class="edit-mode d-none">
+                    <input type="hidden" class="icon-value" data-field="MenuIcon" value="@p.MenuIcon" />
+                    <button type="button" class="btn btn-sm btn-outline-secondary icon-picker-btn">
+                        <i class="@(string.IsNullOrEmpty(p.MenuIcon) ? "fas fa-icons" : p.MenuIcon)"></i> Kies icoon
+                    </button>
+                </div>
+            </td>
+            <td>
                 <span class="view-mode">@p.GoogleTitle</span>
                 <input type="text" class="edit-mode d-none form-control form-control-sm" value="@p.GoogleTitle" data-field="GoogleTitle" />
             </td>
@@ -83,7 +100,7 @@
                 <textarea class="edit-mode d-none form-control form-control-sm" rows="3" data-field="GoogleDescription">@p.GoogleDescription</textarea>
             </td>
             <td>
-                <div class="view-mode d-flex gap-1 align-items-center justify-content-end">
+                <div class="action-buttons-view d-flex gap-1 align-items-center justify-content-end">
                     <button class="btn btn-outline-primary btn-sm edit-btn btn-icon-label" type="button">✏ <span class="btn-label">aanpassen</span></button>
                     <form method="post" action="@Url.Action("MoveUp", new { id = p.Id })" style="display:inline;">
                         @Html.AntiForgeryToken()
@@ -92,6 +109,15 @@
                     <form method="post" action="@Url.Action("MoveDown", new { id = p.Id })" style="display:inline;">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-outline-secondary btn-sm" title="Plaats lager" @(isLast ? "disabled" : "")>▼</button>
+                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn">🗑</button>
+                </div>
+                <div class="delete-actions d-none d-flex gap-1 justify-content-end">
+                    <form method="post" action="@Url.Action("DeletePage", "Pages")" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <button type="button" class="btn btn-sm btn-secondary delete-cancel">✖ annuleren</button>
+                        <button type="submit" class="btn btn-sm btn-danger">🗑 pagina verwijderen</button>
                     </form>
                 </div>
                 <div class="edit-mode d-none">
@@ -113,6 +139,12 @@
                 <input type="text" name="MenuItem" class="form-control form-control-sm" placeholder="Menu item" />
             </td>
             <td>
+                <input type="hidden" name="MenuIcon" id="newPageIcon" value="" />
+                <button type="button" class="btn btn-sm btn-outline-secondary new-page-icon-picker-btn">
+                    <i class="fas fa-icons"></i> Kies icoon
+                </button>
+            </td>
+            <td>
                 <input type="text" name="GoogleTitle" class="form-control form-control-sm" placeholder="Google titel" />
             </td>
             <td>
@@ -127,20 +159,242 @@
 </table>
 </div>
 
+<!-- Icon Picker Modal -->
+<div class="modal fade" id="iconPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kies een icoon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="icon-grid" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px;">
+                    <!-- Font Awesome Solid Icons -->
+                    <div class="icon-item" data-icon="fas fa-home" title="Home"><i class="fas fa-home"></i></div>
+                    <div class="icon-item" data-icon="fas fa-envelope" title="Envelope"><i class="fas fa-envelope"></i></div>
+                    <div class="icon-item" data-icon="fas fa-info-circle" title="Info"><i class="fas fa-info-circle"></i></div>
+                    <div class="icon-item" data-icon="fas fa-phone" title="Phone"><i class="fas fa-phone"></i></div>
+                    <div class="icon-item" data-icon="fas fa-shopping-cart" title="Shopping Cart"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="icon-item" data-icon="fas fa-briefcase" title="Briefcase"><i class="fas fa-briefcase"></i></div>
+                    <div class="icon-item" data-icon="fas fa-newspaper" title="Newspaper"><i class="fas fa-newspaper"></i></div>
+                    <div class="icon-item" data-icon="fas fa-camera" title="Camera"><i class="fas fa-camera"></i></div>
+                    <div class="icon-item" data-icon="fas fa-users" title="Users"><i class="fas fa-users"></i></div>
+                    <div class="icon-item" data-icon="fas fa-star" title="Star"><i class="fas fa-star"></i></div>
+                    <div class="icon-item" data-icon="fas fa-calendar" title="Calendar"><i class="fas fa-calendar"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bullseye" title="Bullseye"><i class="fas fa-bullseye"></i></div>
+                    <div class="icon-item" data-icon="fas fa-lightbulb" title="Lightbulb"><i class="fas fa-lightbulb"></i></div>
+                    <div class="icon-item" data-icon="fas fa-tools" title="Tools"><i class="fas fa-tools"></i></div>
+                    <div class="icon-item" data-icon="fas fa-blog" title="Blog"><i class="fas fa-blog"></i></div>
+                    <div class="icon-item" data-icon="fas fa-graduation-cap" title="Graduation"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="icon-item" data-icon="fas fa-trophy" title="Trophy"><i class="fas fa-trophy"></i></div>
+                    <div class="icon-item" data-icon="fas fa-laptop-code" title="Laptop Code"><i class="fas fa-laptop-code"></i></div>
+                    <div class="icon-item" data-icon="fas fa-globe" title="Globe"><i class="fas fa-globe"></i></div>
+                    <div class="icon-item" data-icon="fas fa-palette" title="Palette"><i class="fas fa-palette"></i></div>
+                    <div class="icon-item" data-icon="fas fa-heart" title="Heart"><i class="fas fa-heart"></i></div>
+                    <div class="icon-item" data-icon="fas fa-map-marker-alt" title="Location"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="icon-item" data-icon="fas fa-book" title="Book"><i class="fas fa-book"></i></div>
+                    <div class="icon-item" data-icon="fas fa-cog" title="Settings"><i class="fas fa-cog"></i></div>
+                    <div class="icon-item" data-icon="fas fa-user" title="User"><i class="fas fa-user"></i></div>
+                    <div class="icon-item" data-icon="fas fa-search" title="Search"><i class="fas fa-search"></i></div>
+                    <div class="icon-item" data-icon="fas fa-download" title="Download"><i class="fas fa-download"></i></div>
+                    <div class="icon-item" data-icon="fas fa-upload" title="Upload"><i class="fas fa-upload"></i></div>
+                    <div class="icon-item" data-icon="fas fa-lock" title="Lock"><i class="fas fa-lock"></i></div>
+                    <div class="icon-item" data-icon="fas fa-unlock" title="Unlock"><i class="fas fa-unlock"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bell" title="Bell"><i class="fas fa-bell"></i></div>
+                    <div class="icon-item" data-icon="fas fa-fire" title="Fire"><i class="fas fa-fire"></i></div>
+                    <div class="icon-item" data-icon="fas fa-cloud" title="Cloud"><i class="fas fa-cloud"></i></div>
+                    <div class="icon-item" data-icon="fas fa-database" title="Database"><i class="fas fa-database"></i></div>
+                    <div class="icon-item" data-icon="fas fa-server" title="Server"><i class="fas fa-server"></i></div>
+                    <div class="icon-item" data-icon="fas fa-code" title="Code"><i class="fas fa-code"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bug" title="Bug"><i class="fas fa-bug"></i></div>
+                    <div class="icon-item" data-icon="fas fa-trash-can" title="Trash"><i class="fas fa-trash-can"></i></div>
+                    <div class="icon-item" data-icon="fas fa-edit" title="Edit"><i class="fas fa-edit"></i></div>
+                    <div class="icon-item" data-icon="fas fa-copy" title="Copy"><i class="fas fa-copy"></i></div>
+                    <div class="icon-item" data-icon="fas fa-paste" title="Paste"><i class="fas fa-paste"></i></div>
+                    <div class="icon-item" data-icon="fas fa-check" title="Check"><i class="fas fa-check"></i></div>
+                    <div class="icon-item" data-icon="fas fa-times" title="Close"><i class="fas fa-times"></i></div>
+                    <div class="icon-item" data-icon="fas fa-plus" title="Plus"><i class="fas fa-plus"></i></div>
+                    <div class="icon-item" data-icon="fas fa-minus" title="Minus"><i class="fas fa-minus"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-up" title="Arrow Up"><i class="fas fa-arrow-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-down" title="Arrow Down"><i class="fas fa-arrow-down"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-left" title="Arrow Left"><i class="fas fa-arrow-left"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-right" title="Arrow Right"><i class="fas fa-arrow-right"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bars" title="Menu"><i class="fas fa-bars"></i></div>
+                    <div class="icon-item" data-icon="fas fa-list" title="List"><i class="fas fa-list"></i></div>
+                    <div class="icon-item" data-icon="fas fa-th" title="Grid"><i class="fas fa-th"></i></div>
+                    <div class="icon-item" data-icon="fas fa-table" title="Table"><i class="fas fa-table"></i></div>
+                    <div class="icon-item" data-icon="fas fa-clock" title="Clock"><i class="fas fa-clock"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bookmark" title="Bookmark"><i class="fas fa-bookmark"></i></div>
+                    <div class="icon-item" data-icon="fas fa-flag" title="Flag"><i class="fas fa-flag"></i></div>
+                    <div class="icon-item" data-icon="fas fa-map-marker" title="Map Marker"><i class="fas fa-map-marker"></i></div>
+                    <div class="icon-item" data-icon="fas fa-map" title="Map"><i class="fas fa-map"></i></div>
+                    <div class="icon-item" data-icon="fas fa-compass" title="Compass"><i class="fas fa-compass"></i></div>
+                    <div class="icon-item" data-icon="fas fa-file" title="File"><i class="fas fa-file"></i></div>
+                    <div class="icon-item" data-icon="fas fa-folder" title="Folder"><i class="fas fa-folder"></i></div>
+                    <div class="icon-item" data-icon="fas fa-folder-open" title="Folder Open"><i class="fas fa-folder-open"></i></div>
+                    <div class="icon-item" data-icon="fas fa-file-pdf" title="PDF"><i class="fas fa-file-pdf"></i></div>
+                    <div class="icon-item" data-icon="fas fa-file-word" title="Word"><i class="fas fa-file-word"></i></div>
+                    <div class="icon-item" data-icon="fas fa-file-excel" title="Excel"><i class="fas fa-file-excel"></i></div>
+                    <div class="icon-item" data-icon="fas fa-money-bill" title="Money"><i class="fas fa-money-bill"></i></div>
+                    <div class="icon-item" data-icon="fas fa-credit-card" title="Credit Card"><i class="fas fa-credit-card"></i></div>
+                    <div class="icon-item" data-icon="fas fa-shopping-bag" title="Shopping Bag"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="icon-item" data-icon="fas fa-image" title="Image"><i class="fas fa-image"></i></div>
+                    <div class="icon-item" data-icon="fas fa-video" title="Video"><i class="fas fa-video"></i></div>
+                    <div class="icon-item" data-icon="fas fa-music" title="Music"><i class="fas fa-music"></i></div>
+                    <div class="icon-item" data-icon="fas fa-volume-up" title="Volume"><i class="fas fa-volume-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-headphones" title="Headphones"><i class="fas fa-headphones"></i></div>
+                    <div class="icon-item" data-icon="fas fa-link" title="Link"><i class="fas fa-link"></i></div>
+                    <div class="icon-item" data-icon="fas fa-terminal" title="Terminal"><i class="fas fa-terminal"></i></div>
+                    <div class="icon-item" data-icon="fas fa-desktop" title="Desktop"><i class="fas fa-desktop"></i></div>
+                    <div class="icon-item" data-icon="fas fa-laptop" title="Laptop"><i class="fas fa-laptop"></i></div>
+                    <div class="icon-item" data-icon="fas fa-mobile-alt" title="Mobile"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="icon-item" data-icon="fas fa-building" title="Building"><i class="fas fa-building"></i></div>
+                    <div class="icon-item" data-icon="fas fa-hospital" title="Hospital"><i class="fas fa-hospital"></i></div>
+                    <div class="icon-item" data-icon="fas fa-school" title="School"><i class="fas fa-school"></i></div>
+                    <div class="icon-item" data-icon="fas fa-car" title="Car"><i class="fas fa-car"></i></div>
+                    <div class="icon-item" data-icon="fas fa-bus" title="Bus"><i class="fas fa-bus"></i></div>
+                    <div class="icon-item" data-icon="fas fa-calculator" title="Calculator"><i class="fas fa-calculator"></i></div>
+                    <div class="icon-item" data-icon="fas fa-certificate" title="Certificate"><i class="fas fa-certificate"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chart-bar" title="Chart Bar"><i class="fas fa-chart-bar"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chart-line" title="Chart Line"><i class="fas fa-chart-line"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chart-pie" title="Chart Pie"><i class="fas fa-chart-pie"></i></div>
+                    <div class="icon-item" data-icon="fas fa-train" title="Train"><i class="fas fa-train"></i></div>
+                    <div class="icon-item" data-icon="fas fa-plane" title="Plane"><i class="fas fa-plane"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rocket" title="Rocket"><i class="fas fa-rocket"></i></div>
+                    <div class="icon-item" data-icon="fas fa-wrench" title="Wrench"><i class="fas fa-wrench"></i></div>
+                    <div class="icon-item" data-icon="fas fa-hammer" title="Hammer"><i class="fas fa-hammer"></i></div>
+                    <div class="icon-item" data-icon="fas fa-screwdriver" title="Screwdriver"><i class="fas fa-screwdriver"></i></div>
+                    <div class="icon-item" data-icon="fas fa-sliders" title="Sliders"><i class="fas fa-sliders"></i></div>
+                    <div class="icon-item" data-icon="fas fa-comment" title="Comment"><i class="fas fa-comment"></i></div>
+                    <div class="icon-item" data-icon="fas fa-comments" title="Comments"><i class="fas fa-comments"></i></div>
+                    <div class="icon-item" data-icon="fas fa-circle-check" title="Circle Check"><i class="fas fa-circle-check"></i></div>
+                    <div class="icon-item" data-icon="fas fa-circle-xmark" title="Circle X"><i class="fas fa-circle-xmark"></i></div>
+                    <div class="icon-item" data-icon="fas fa-square-check" title="Square Check"><i class="fas fa-square-check"></i></div>
+                    <div class="icon-item" data-icon="fas fa-square-xmark" title="Square X"><i class="fas fa-square-xmark"></i></div>
+                    <div class="icon-item" data-icon="fas fa-thumbs-up" title="Thumbs Up"><i class="fas fa-thumbs-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-thumbs-down" title="Thumbs Down"><i class="fas fa-thumbs-down"></i></div>
+                    <div class="icon-item" data-icon="fas fa-smile" title="Smile"><i class="fas fa-smile"></i></div>
+                    <div class="icon-item" data-icon="fas fa-meh" title="Meh"><i class="fas fa-meh"></i></div>
+                    <div class="icon-item" data-icon="fas fa-laugh" title="Laugh"><i class="fas fa-laugh"></i></div>
+                    <div class="icon-item" data-icon="fas fa-sun" title="Sun"><i class="fas fa-sun"></i></div>
+                    <div class="icon-item" data-icon="fas fa-cloud-rain" title="Cloud Rain"><i class="fas fa-cloud-rain"></i></div>
+                    <div class="icon-item" data-icon="fas fa-wind" title="Wind"><i class="fas fa-wind"></i></div>
+                    <div class="icon-item" data-icon="fas fa-snowflake" title="Snowflake"><i class="fas fa-snowflake"></i></div>
+                    <div class="icon-item" data-icon="fas fa-book-open" title="Book Open"><i class="fas fa-book-open"></i></div>
+                    <div class="icon-item" data-icon="fas fa-book-bookmark" title="Book Bookmark"><i class="fas fa-book-bookmark"></i></div>
+                    <div class="icon-item" data-icon="fas fa-telescope" title="Telescope"><i class="fas fa-telescope"></i></div>
+                    <div class="icon-item" data-icon="fas fa-flask-vial" title="Flask Vial"><i class="fas fa-flask-vial"></i></div>
+                    <div class="icon-item" data-icon="fas fa-volume-high" title="Volume High"><i class="fas fa-volume-high"></i></div>
+                    <div class="icon-item" data-icon="fas fa-volume-low" title="Volume Low"><i class="fas fa-volume-low"></i></div>
+                    <div class="icon-item" data-icon="fas fa-volume-off" title="Volume Off"><i class="fas fa-volume-off"></i></div>
+                    <div class="icon-item" data-icon="fas fa-wifi" title="WiFi"><i class="fas fa-wifi"></i></div>
+                    <div class="icon-item" data-icon="fas fa-wifi-slash" title="WiFi Slash"><i class="fas fa-wifi-slash"></i></div>
+                    <div class="icon-item" data-icon="fas fa-battery-full" title="Battery Full"><i class="fas fa-battery-full"></i></div>
+                    <div class="icon-item" data-icon="fas fa-battery-half" title="Battery Half"><i class="fas fa-battery-half"></i></div>
+                    <div class="icon-item" data-icon="fas fa-battery-empty" title="Battery Empty"><i class="fas fa-battery-empty"></i></div>
+                    <div class="icon-item" data-icon="fas fa-podcast" title="Podcast"><i class="fas fa-podcast"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rss" title="RSS"><i class="fas fa-rss"></i></div>
+                    <div class="icon-item" data-icon="fas fa-share" title="Share"><i class="fas fa-share"></i></div>
+                    <div class="icon-item" data-icon="fas fa-share-nodes" title="Share Nodes"><i class="fas fa-share-nodes"></i></div>
+                    <div class="icon-item" data-icon="fas fa-paper-plane" title="Paper Plane"><i class="fas fa-paper-plane"></i></div>
+                    <div class="icon-item" data-icon="fas fa-print" title="Print"><i class="fas fa-print"></i></div>
+                    <div class="icon-item" data-icon="fas fa-paintbrush" title="Paintbrush"><i class="fas fa-paintbrush"></i></div>
+                    <div class="icon-item" data-icon="fas fa-highlighter" title="Highlighter"><i class="fas fa-highlighter"></i></div>
+                    <div class="icon-item" data-icon="fas fa-marker" title="Marker"><i class="fas fa-marker"></i></div>
+                    <div class="icon-item" data-icon="fas fa-ruler" title="Ruler"><i class="fas fa-ruler"></i></div>
+                    <div class="icon-item" data-icon="fas fa-backspace" title="Backspace"><i class="fas fa-backspace"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rotate-left" title="Rotate Left"><i class="fas fa-rotate-left"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rotate-right" title="Rotate Right"><i class="fas fa-rotate-right"></i></div>
+                    <div class="icon-item" data-icon="fas fa-flip-horizontal" title="Flip Horizontal"><i class="fas fa-flip-horizontal"></i></div>
+                    <div class="icon-item" data-icon="fas fa-flip-vertical" title="Flip Vertical"><i class="fas fa-flip-vertical"></i></div>
+                    <div class="icon-item" data-icon="fas fa-maximize" title="Maximize"><i class="fas fa-maximize"></i></div>
+                    <div class="icon-item" data-icon="fas fa-minimize" title="Minimize"><i class="fas fa-minimize"></i></div>
+                    <div class="icon-item" data-icon="fas fa-magnifying-glass" title="Magnifying Glass"><i class="fas fa-magnifying-glass"></i></div>
+                    <div class="icon-item" data-icon="fas fa-magnifying-glass-plus" title="Search Plus"><i class="fas fa-magnifying-glass-plus"></i></div>
+                    <div class="icon-item" data-icon="fas fa-magnifying-glass-minus" title="Search Minus"><i class="fas fa-magnifying-glass-minus"></i></div>
+                    <div class="icon-item" data-icon="fas fa-eye-dropper" title="Eye Dropper"><i class="fas fa-eye-dropper"></i></div>
+                    <div class="icon-item" data-icon="fas fa-droplet" title="Droplet"><i class="fas fa-droplet"></i></div>
+                    <div class="icon-item" data-icon="fas fa-water" title="Water"><i class="fas fa-water"></i></div>
+                    <div class="icon-item" data-icon="fas fa-clover" title="Clover"><i class="fas fa-clover"></i></div>
+                    <div class="icon-item" data-icon="fas fa-tree" title="Tree"><i class="fas fa-tree"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chess" title="Chess"><i class="fas fa-chess"></i></div>
+                    <div class="icon-item" data-icon="fas fa-balance-scale" title="Balance Scale"><i class="fas fa-balance-scale"></i></div>
+                    <div class="icon-item" data-icon="fas fa-gears" title="Gears"><i class="fas fa-gears"></i></div>
+                    <div class="icon-item" data-icon="fas fa-gear" title="Gear"><i class="fas fa-gear"></i></div>
+                    <div class="icon-item" data-icon="fas fa-power-off" title="Power Off"><i class="fas fa-power-off"></i></div>
+                    <div class="icon-item" data-icon="fas fa-toggle-on" title="Toggle On"><i class="fas fa-toggle-on"></i></div>
+                    <div class="icon-item" data-icon="fas fa-toggle-off" title="Toggle Off"><i class="fas fa-toggle-off"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chevron-up" title="Chevron Up"><i class="fas fa-chevron-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chevron-down" title="Chevron Down"><i class="fas fa-chevron-down"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chevron-left" title="Chevron Left"><i class="fas fa-chevron-left"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chevron-right" title="Chevron Right"><i class="fas fa-chevron-right"></i></div>
+                    <div class="icon-item" data-icon="fas fa-angle-up" title="Angle Up"><i class="fas fa-angle-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-angle-down" title="Angle Down"><i class="fas fa-angle-down"></i></div>
+                    <div class="icon-item" data-icon="fas fa-angle-left" title="Angle Left"><i class="fas fa-angle-left"></i></div>
+                    <div class="icon-item" data-icon="fas fa-angle-right" title="Angle Right"><i class="fas fa-angle-right"></i></div>
+                    <div class="icon-item" data-icon="fas fa-triangle-exclamation" title="Triangle Exclamation"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="icon-item" data-icon="fas fa-exclamation" title="Exclamation"><i class="fas fa-exclamation"></i></div>
+                    <div class="icon-item" data-icon="fas fa-question" title="Question"><i class="fas fa-question"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rectangle" title="Rectangle"><i class="fas fa-rectangle"></i></div>
+                    <div class="icon-item" data-icon="fas fa-hexagon" title="Hexagon"><i class="fas fa-hexagon"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-trend-up" title="Arrow Trend Up"><i class="fas fa-arrow-trend-up"></i></div>
+                    <div class="icon-item" data-icon="fas fa-arrow-trend-down" title="Arrow Trend Down"><i class="fas fa-arrow-trend-down"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chart-simple" title="Chart Simple"><i class="fas fa-chart-simple"></i></div>
+                    <div class="icon-item" data-icon="fas fa-chart-area" title="Chart Area"><i class="fas fa-chart-area"></i></div>
+                    <div class="icon-item" data-icon="fas fa-percent" title="Percent"><i class="fas fa-percent"></i></div>
+                    <div class="icon-item" data-icon="fas fa-dollar-sign" title="Dollar"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="icon-item" data-icon="fas fa-yen-sign" title="Yen"><i class="fas fa-yen-sign"></i></div>
+                    <div class="icon-item" data-icon="fas fa-rupee-sign" title="Rupee"><i class="fas fa-rupee-sign"></i></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                <button type="button" class="btn btn-danger" id="clearIconBtn">Geen icoon</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1.2rem;
+    }
+    .icon-item:hover {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+    .icon-item.selected {
+        border-color: #0d6efd;
+        background-color: #cfe2ff;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const editBtns = document.querySelectorAll('.edit-btn');
         const cancelBtns = document.querySelectorAll('.cancel-btn');
         const saveBtns = document.querySelectorAll('.save-btn');
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        const deleteCancelBtns = document.querySelectorAll('.delete-cancel');
 
         editBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const row = this.closest('.page-row');
                 const viewElements = row.querySelectorAll('.view-mode');
                 const editElements = row.querySelectorAll('.edit-mode');
+                const actionButtons = row.querySelector('.action-buttons-view');
                 
                 viewElements.forEach(el => el.classList.add('d-none'));
                 editElements.forEach(el => el.classList.remove('d-none'));
+                if (actionButtons) actionButtons.classList.add('d-none');
             });
         });
 
@@ -149,9 +403,11 @@
                 const row = this.closest('.page-row');
                 const viewElements = row.querySelectorAll('.view-mode');
                 const editElements = row.querySelectorAll('.edit-mode');
+                const actionButtons = row.querySelector('.action-buttons-view');
                 
                 editElements.forEach(el => el.classList.add('d-none'));
                 viewElements.forEach(el => el.classList.remove('d-none'));
+                if (actionButtons) actionButtons.classList.remove('d-none');
             });
         });
 
@@ -164,6 +420,7 @@
                 formData.append('Id', pageId);
                 formData.append('Title', row.querySelector('[data-field="Title"]').value);
                 formData.append('MenuItem', row.querySelector('[data-field="MenuItem"]').value);
+                formData.append('MenuIcon', row.querySelector('[data-field="MenuIcon"]').value);
                 formData.append('GoogleTitle', row.querySelector('[data-field="GoogleTitle"]').value);
                 formData.append('GoogleDescription', row.querySelector('[data-field="GoogleDescription"]').value);
                 
@@ -187,12 +444,16 @@
                         const spans = row.querySelectorAll('td > .view-mode');
                         spans[0].textContent = formData.get('Title') || '';
                         spans[1].textContent = formData.get('MenuItem') || '';
-                        spans[2].textContent = formData.get('GoogleTitle') || '';
-                        spans[3].textContent = formData.get('GoogleDescription') || '';
+                        const iconValue = formData.get('MenuIcon') || '';
+                        spans[2].innerHTML = iconValue ? '<i class="' + iconValue + '"></i>' : '-';
+                        spans[3].textContent = formData.get('GoogleTitle') || '';
+                        spans[4].textContent = formData.get('GoogleDescription') || '';
                         
                         // Switch back to view mode
                         row.querySelectorAll('.edit-mode').forEach(el => el.classList.add('d-none'));
                         row.querySelectorAll('.view-mode').forEach(el => el.classList.remove('d-none'));
+                        const actionButtons = row.querySelector('.action-buttons-view');
+                        if (actionButtons) actionButtons.classList.remove('d-none');
                         
                         btn.textContent = originalText;
                         btn.disabled = false;
@@ -206,6 +467,100 @@
                     btn.disabled = false;
                 });
             });
+        });
+
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.page-row');
+                const viewActions = row.querySelector('.action-buttons-view');
+                const deleteActions = row.querySelector('.delete-actions');
+                
+                viewActions.classList.add('d-none');
+                deleteActions.classList.remove('d-none');
+            });
+        });
+
+        deleteCancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const row = this.closest('.page-row');
+                const viewActions = row.querySelector('.action-buttons-view');
+                const deleteActions = row.querySelector('.delete-actions');
+                
+                deleteActions.classList.add('d-none');
+                viewActions.classList.remove('d-none');
+            });
+        });
+
+        // Icon Picker functionality
+        let currentIconInput = null;
+        let currentIconButton = null;
+        const modal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
+        const iconItems = document.querySelectorAll('.icon-item');
+
+        // Open icon picker for edit mode
+        document.querySelectorAll('.icon-picker-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                currentIconInput = row.querySelector('.icon-value');
+                currentIconButton = this;
+                
+                // Highlight currently selected icon
+                iconItems.forEach(item => item.classList.remove('selected'));
+                const currentIcon = currentIconInput.value;
+                if (currentIcon) {
+                    const selectedItem = document.querySelector(`.icon-item[data-icon="${currentIcon}"]`);
+                    if (selectedItem) selectedItem.classList.add('selected');
+                }
+                
+                modal.show();
+            });
+        });
+
+        // Open icon picker for new page form
+        document.querySelector('.new-page-icon-picker-btn').addEventListener('click', function() {
+            currentIconInput = document.getElementById('newPageIcon');
+            currentIconButton = this;
+            
+            iconItems.forEach(item => item.classList.remove('selected'));
+            const currentIcon = currentIconInput.value;
+            if (currentIcon) {
+                const selectedItem = document.querySelector(`.icon-item[data-icon="${currentIcon}"]`);
+                if (selectedItem) selectedItem.classList.add('selected');
+            }
+            
+            modal.show();
+        });
+
+        // Select icon from grid
+        iconItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const iconClass = this.getAttribute('data-icon');
+                
+                if (currentIconInput) {
+                    currentIconInput.value = iconClass;
+                }
+                
+                if (currentIconButton) {
+                    const iconElement = currentIconButton.querySelector('i');
+                    iconElement.className = iconClass;
+                }
+                
+                modal.hide();
+            });
+        });
+
+        // Clear icon
+        document.getElementById('clearIconBtn').addEventListener('click', function() {
+            if (currentIconInput) {
+                currentIconInput.value = '';
+            }
+            
+            if (currentIconButton) {
+                const iconElement = currentIconButton.querySelector('i');
+                iconElement.className = 'fas fa-icons';
+            }
+            
+            modal.hide();
         });
     });
 </script>

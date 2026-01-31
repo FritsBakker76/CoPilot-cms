@@ -11,6 +11,8 @@ namespace CmsModern.Models
         public string Description { get; set; }
         [Column("menu_item")]
         public string MenuItem { get; set; }
+        [Column("menu_icon")]
+        public string MenuIcon { get; set; }
         [Column("google_title")]
         public string GoogleTitle { get; set; }
         [Column("google_description")]
